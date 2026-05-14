@@ -1,5 +1,18 @@
 ## Aria
 
+### Contributing
+- **Fork the repository** and **create a new branch** for your feature or bug fix.
+- Run the following commands to set up your development environment:
+```bash
+git clone <repository_url>
+git checkout -b feature/your-feature-name
+
+# Make your changes and commit them
+git add .
+git commit -m "Add your commit message here"
+git push origin feature/your-feature-name
+```
+
 ### Frontend Setup
 
 ```bash
