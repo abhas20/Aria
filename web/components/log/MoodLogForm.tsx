@@ -159,7 +159,7 @@ export function MoodLogForm({ onLogged }: { onLogged?: () => void }) {
 
           <div className="grid grid-cols-2 gap-2 text-sm">
             {todayCheckin.energy_level && (
-              <div className="bg-amber-50 rounded-lg px-3 py-2">
+              <div className="bg-amber-200 rounded-lg px-3 py-2">
                 <p className="text-xs text-amber-600 font-medium">Energy</p>
                 <p className="font-semibold text-amber-800">{todayCheckin.energy_level}/10</p>
               </div>
@@ -206,8 +206,7 @@ export function MoodLogForm({ onLogged }: { onLogged?: () => void }) {
               size="sm"
               variant="ghost"
               onClick={() => setEditing(false)}
-              className="text-xs text-gray-400 hover:text-gray-600 h-7 px-2"
-            >
+              className="text-xs text-gray-400 hover:text-gray-600 h-7 px-2">
               Cancel
             </Button>
           )}
@@ -228,8 +227,7 @@ export function MoodLogForm({ onLogged }: { onLogged?: () => void }) {
                     selectedScore === opt.score
                       ? opt.color + " border-2"
                       : "border-gray-100 hover:border-gray-200 text-gray-500"
-                  }`}
-                >
+                  }`}>
                   <span className="text-xl mb-1">{opt.emoji}</span>
                   <span className="text-[11px] font-medium">{opt.label}</span>
                 </button>
@@ -252,8 +250,7 @@ export function MoodLogForm({ onLogged }: { onLogged?: () => void }) {
                     selectedTags.includes(tag)
                       ? "border-rose-300 bg-rose-50 text-rose-700"
                       : "border-gray-200 text-gray-500 hover:border-gray-300"
-                  }`}
-                >
+                  }`}>
                   {tag}
                 </button>
               ))}
@@ -264,15 +261,23 @@ export function MoodLogForm({ onLogged }: { onLogged?: () => void }) {
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <Label className="text-sm text-gray-600">Energy level</Label>
-              <span className="text-sm font-medium text-amber-600">{energyLevel[0]}/10</span>
+              <span className="text-sm font-medium text-amber-600">
+                {energyLevel[0]}/10
+              </span>
             </div>
             <Slider
-              min={1} max={10} step={1}
+              className="border-2 border-blue-300"
+              min={1}
+              max={10}
+              step={1}
               value={energyLevel}
-              onValueChange={(v) => setEnergyLevel(Array.isArray(v) ? [...v] : [v as number])}
+              onValueChange={(v) =>
+                setEnergyLevel(Array.isArray(v) ? [...v] : [v as number])
+              }
             />
             <div className="flex justify-between text-xs text-gray-400">
-              <span>Exhausted</span><span>Energised</span>
+              <span>Exhausted</span>
+              <span>Energised</span>
             </div>
           </div>
 
@@ -280,15 +285,23 @@ export function MoodLogForm({ onLogged }: { onLogged?: () => void }) {
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <Label className="text-sm text-gray-600">Stress level</Label>
-              <span className="text-sm font-medium text-purple-600">{stressLevel[0]}/10</span>
+              <span className="text-sm font-medium text-purple-600">
+                {stressLevel[0]}/10
+              </span>
             </div>
             <Slider
-              min={1} max={10} step={1}
+              className="border-2 border-blue-300"
+              min={1}
+              max={10}
+              step={1}
               value={stressLevel}
-              onValueChange={(v) => setStressLevel(Array.isArray(v) ? [...v] : [v as number])}
+              onValueChange={(v) =>
+                setStressLevel(Array.isArray(v) ? [...v] : [v as number])
+              }
             />
             <div className="flex justify-between text-xs text-gray-400">
-              <span>Relaxed</span><span>Very stressed</span>
+              <span>Relaxed</span>
+              <span>Very stressed</span>
             </div>
           </div>
 
@@ -308,15 +321,20 @@ export function MoodLogForm({ onLogged }: { onLogged?: () => void }) {
           </div>
 
           {error && (
-            <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+            <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2">
+              {error}
+            </p>
           )}
 
           <Button
             type="submit"
             disabled={loading || selectedScore === null}
-            className="w-full bg-rose-500 hover:bg-rose-600 text-white"
-          >
-            {loading ? "Saving…" : editing ? "Update check-in" : "Save check-in"}
+            className="w-full bg-rose-500 hover:bg-rose-600 text-white">
+            {loading
+              ? "Saving…"
+              : editing
+                ? "Update check-in"
+                : "Save check-in"}
           </Button>
         </form>
       </CardContent>

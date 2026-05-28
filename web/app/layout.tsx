@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { DM_Sans, DM_Serif_Display, Inter } from "next/font/google";
-import { cn } from "@/lib/utils";
 import AuthProvider from "./providers/AuthProviders";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});

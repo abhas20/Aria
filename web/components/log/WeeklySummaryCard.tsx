@@ -99,7 +99,7 @@ export function WeeklySummaryCard() {
         <div className="flex items-start justify-between gap-2">
           <div>
             <CardTitle className="text-base font-semibold text-gray-800 flex items-center gap-2">
-              Weekly health summary
+              Your Weekly health summary
               {summary?.is_stale && (
                 <Badge
                   variant="outline"

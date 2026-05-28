@@ -11,7 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import DangerZone from "@/components/general/DangerZone";
-import { useRequireAuth } from "@/app/hooks/useAuth";
+import { HugeiconsIcon } from '@hugeicons/react';
+import { LogoutSquare01Icon } from '@hugeicons/core-free-icons'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -69,6 +70,7 @@ function mapUserResponse(data: any):UserProfile {
     email: data.email,
     name: data.name,
     dateOfBirth: data.date_of_birth,
+    createdAt: data.created_at,
     healthConcerns: data.health_concerns,
     preferredLanguage: data.preferred_language,
     onboardingComplete: data.onboarding_complete,
@@ -352,7 +354,14 @@ export default function ProfileComp({
                 label: "Language",
                 value: user.preferredLanguage === "hi" ? "हिंदी" : "English",
               },
-              { label: "Member since", value: "—" },
+              {
+                label: "Member since",
+                value: new Date(user.createdAt).toLocaleDateString("en-IN", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                }),
+              },
             ].map(({ label, value }) => (
               <div
                 key={label}
@@ -383,7 +392,15 @@ export default function ProfileComp({
             }}
             className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors text-sm text-gray-600 group">
             <span className="flex items-center gap-2.5">
-              <span>🚪</span> Sign out
+              <span>
+                <HugeiconsIcon
+                  icon={LogoutSquare01Icon}
+                  size={24}
+                  color="#104b97"
+                  strokeWidth={1.5}
+                />
+              </span>{" "}
+              Sign out
             </span>
             <span className="text-gray-300 group-hover:text-gray-400">→</span>
           </button>

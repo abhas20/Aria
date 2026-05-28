@@ -10,6 +10,7 @@ export interface UserProfile {
   email: string | null;
   name: string | null;
   dateOfBirth: string | null; 
+  createdAt: string;
   healthConcerns: HealthConcern[];
   preferredLanguage: Language;
   onboardingComplete: boolean;

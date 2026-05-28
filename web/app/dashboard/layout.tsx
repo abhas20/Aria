@@ -24,6 +24,7 @@ const NAV_ITEMS = [
   { href: "/dashboard/yoga", label: "Yoga", icon: YogaIcon },
   { href: "/dashboard/timer", label: "Timer", icon: TimerIcon },
   { href: "/dashboard/store", label: "Wellness", icon: StoreIcon },
+  { href: "/dashboard/summary", label: "Summary", icon: SummaryIcon },
 ];
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
@@ -144,6 +145,24 @@ function MenuIcon() {
       <line x1="3" y1="6" x2="21" y2="6" />
       <line x1="3" y1="12" x2="21" y2="12" />
       <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+  );
+}
+
+function SummaryIcon({ active }: { active?: boolean }) {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={active ? 2.5 : 1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round">
+      <path d="M4 4h16v16H4z" />
+      <line x1="4" y1="9" x2="20" y2="9" />
+      <line x1="9" y1="21" x2="9" y2="9" />
     </svg>
   );
 }
@@ -337,7 +356,7 @@ export default function DashboardLayout({
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onClick={() => router.push("/dashboard/profile")}
+                    onClick={() => router.push("/profile")}
                     className="cursor-pointer">
                     <span className="mr-2">👤</span> My profile
                   </DropdownMenuItem>

@@ -33,7 +33,7 @@ export default function AriaPage() {
     clearPendingMessage,
   } = useChatStore();
 
-  // ── Local UI state (never needs to survive route changes) ─────────────────
+  // ── Local UI state ─────────────────
   const [loadingConvos, setLoadingConvos] = useState(true);
   const [loadingMsgs, setLoadingMsgs]     = useState(false);
   const [typing, setTyping]               = useState(false);
@@ -42,6 +42,8 @@ export default function AriaPage() {
   const [listening, setListening]         = useState(false);
   const [voiceOutput, setVoiceOutput]     = useState(false);
   const [sidebarOpen, setSidebarOpen]     = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+
 
   // input comes from pendingMessage store so it survives errors
   const [input, setInput] = useState(pendingMessage);
@@ -255,29 +257,72 @@ export default function AriaPage() {
     }
   }
 
-  // ── Voice (unchanged from before) ─────────────────────────────────────────
+  // -- Voice input/output handlers ─────────────────────────────────────────────    
+  async function toggleListening() {
+    // If already listening, stop the recording
+    if (listening && mediaRecorder) {
+      mediaRecorder.stop();
+      setListening(false);
+      return;
+    }
 
-  function toggleListening() {
-    if (listening) { recognitionRef.current?.stop(); setListening(false); return; }
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) { alert("Voice input not supported. Try Chrome."); return; }
-    const rec = new SR();
-    rec.lang = language === "hi" ? "hi-IN" : "en-US";
-    rec.continuous = false;
-    rec.interimResults = false;
-    rec.onstart  = () => setListening(true);
-    rec.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      setInput(transcript);
-      if (textareaRef.current) {
-        textareaRef.current.style.height = "auto";
-        textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 128) + "px";
-      }
-    };
-    rec.onerror = () => setListening(false);
-    rec.onend   = () => setListening(false);
-    recognitionRef.current = rec;
-    rec.start();
+    try {
+      // Request microphone access
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      const audioChunks: Blob[] = [];
+
+      // Collect audio data as the user speaks
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunks.push(event.data);
+      };
+
+      // When recording stops, send the audio to our backend
+      recorder.onstop = async () => {
+        // Release the microphone stream
+        stream.getTracks().forEach((track) => track.stop());
+
+        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+        const formData = new FormData();
+        formData.append("file", audioBlob);
+
+        try {
+          setTyping(true);
+
+          const res = await api.post("/chat/stt" , formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            }
+          })
+
+          const data = await res.data;
+
+          if (data.text) {
+            setInput(data.text);
+            if (textareaRef.current) {
+              textareaRef.current.style.height = "auto";
+              textareaRef.current.style.height =
+                Math.min(textareaRef.current.scrollHeight, 128) + "px";
+            }
+          } else {
+            setError("Could not understand the audio.");
+          }
+        } catch (err) {
+          setError("Network error while transcribing audio.");
+        } finally {
+          setTyping(false);
+        }
+      };
+
+      // Start recording
+      recorder.start();
+      setMediaRecorder(recorder);
+      setListening(true);
+      setError(""); // Clear any previous errors
+    } catch (err) {
+      console.error("Mic access denied or error:", err);
+      setError("Please allow microphone access in your browser.");
+    }
   }
 
   function speak(text: string) {
@@ -359,7 +404,6 @@ export default function AriaPage() {
   return (
     // Negative margin breaks out of the dashboard page padding to go full-height
     <div className="flex h-[calc(100vh-3.5rem)] -m-4 md:-m-6 overflow-hidden">
-
       {/* ── Desktop sidebar ────────────────────────────────────────────── */}
       <aside className="hidden md:flex flex-col w-64 border-r border-gray-100 bg-white shrink-0">
         {ConversationSidebar}
@@ -370,11 +414,12 @@ export default function AriaPage() {
         <div className="md:hidden fixed inset-0 z-50 flex">
           <div className="w-72 bg-white h-full shadow-xl flex flex-col">
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
-              <span className="text-sm font-semibold text-gray-700">Conversations</span>
+              <span className="text-sm font-semibold text-gray-700">
+                Conversations
+              </span>
               <button
                 onClick={() => setSidebarOpen(false)}
-                className="text-gray-400 hover:text-gray-600 text-xl leading-none"
-              >
+                className="text-gray-400 hover:text-gray-600 text-xl leading-none">
                 ✕
               </button>
             </div>
@@ -390,15 +435,13 @@ export default function AriaPage() {
 
       {/* ── Chat panel ─────────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col bg-[#faf8f5] min-w-0">
-
         {/* ── Header ───────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between px-4 md:px-6 py-3 bg-white border-b border-gray-100 shrink-0">
           <div className="flex items-center gap-3">
             {/* Mobile: open sidebar button */}
             <button
               onClick={() => setSidebarOpen(true)}
-              className="md:hidden text-gray-400 hover:text-gray-600 transition-colors text-xl leading-none"
-            >
+              className="md:hidden text-gray-400 hover:text-gray-600 transition-colors text-xl leading-none">
               ☰
             </button>
 
@@ -408,8 +451,7 @@ export default function AriaPage() {
             <div>
               <p
                 className="text-sm font-semibold text-gray-800"
-                style={{ fontFamily: "'DM Serif Display', serif" }}
-              >
+                style={{ fontFamily: "'DM Serif Display', serif" }}>
                 Dr. Aria
               </p>
               <p className="text-[11px] text-gray-400 hidden sm:block">
@@ -429,8 +471,7 @@ export default function AriaPage() {
                     language === lang
                       ? "bg-white text-gray-800 shadow-sm"
                       : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
+                  }`}>
                   {lang === "en" ? "EN" : "हि"}
                 </button>
               ))}
@@ -447,8 +488,11 @@ export default function AriaPage() {
                   ? "text-rose-500 bg-rose-50 ring-1 ring-rose-200"
                   : "text-gray-300 hover:text-gray-500 hover:bg-gray-100"
               }`}
-              title={voiceOutput ? "Voice on — click to mute Aria" : "Click to let Aria speak"}
-            >
+              title={
+                voiceOutput
+                  ? "Voice on — click to mute Aria"
+                  : "Click to let Aria speak"
+              }>
               🔊
             </button>
           </div>
@@ -468,9 +512,10 @@ export default function AriaPage() {
               </div>
               <h2
                 className="text-xl font-semibold text-gray-700 mb-2"
-                style={{ fontFamily: "'DM Serif Display', serif" }}
-              >
-                {language === "hi" ? "नमस्ते, मैं Dr. Aria हूँ" : "Hi, I'm Dr. Aria"}
+                style={{ fontFamily: "'DM Serif Display', serif" }}>
+                {language === "hi"
+                  ? "नमस्ते, मैं Dr. Aria हूँ"
+                  : "Hi, I'm Dr. Aria"}
               </h2>
               <p className="text-sm text-gray-400 max-w-xs leading-relaxed mb-6">
                 {language === "hi"
@@ -498,8 +543,7 @@ export default function AriaPage() {
                       setInput(s);
                       textareaRef.current?.focus();
                     }}
-                    className="text-left text-sm text-gray-500 border border-gray-200 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 rounded-xl px-4 py-2.5 transition-all"
-                  >
+                    className="text-left text-sm text-gray-500 border border-gray-200 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 rounded-xl px-4 py-2.5 transition-all">
                     {s} →
                   </button>
                 ))}
@@ -511,7 +555,9 @@ export default function AriaPage() {
                 <MessageBubble
                   key={msg.id}
                   msg={msg}
-                  onSpeak={msg.role === "model" ? speak : undefined}
+                  onSpeak={
+                    msg.role === "model" ? () => speak(msg.content) : undefined
+                  }
                 />
               ))}
               {typing && <TypingIndicator />}
@@ -533,8 +579,7 @@ export default function AriaPage() {
               listening
                 ? "border-rose-300 bg-rose-50/40"
                 : "border-gray-200 bg-gray-50 focus-within:border-rose-200 focus-within:bg-white"
-            }`}
-          >
+            }`}>
             {/* Mic */}
             <button
               type="button"
@@ -544,19 +589,26 @@ export default function AriaPage() {
                   ? "bg-rose-500 text-white animate-pulse"
                   : "text-gray-400 hover:text-rose-500 hover:bg-rose-50"
               }`}
-              title={listening ? "Listening — tap to stop" : "Tap to speak"}
-            >
+              title={listening ? "Listening — tap to stop" : "Tap to speak"}>
               🎤
             </button>
 
             {/* Textarea */}
             <textarea
               ref={textareaRef}
-              value={listening ? (language === "hi" ? "सुन रही हूँ…" : "Listening…") : input}
+              value={
+                listening
+                  ? language === "hi"
+                    ? "सुन रही हूँ…"
+                    : "Listening…"
+                  : input
+              }
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               placeholder={
-                language === "hi" ? "Aria से कुछ भी पूछें…" : "Ask Aria anything…"
+                language === "hi"
+                  ? "Aria से कुछ भी पूछें…"
+                  : "Ask Aria anything…"
               }
               disabled={listening || isLoading}
               rows={1}
@@ -568,12 +620,15 @@ export default function AriaPage() {
               type="button"
               onClick={sendMessage}
               disabled={!input.trim() || isLoading || listening}
-              className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-rose-500 hover:bg-rose-600 disabled:opacity-30 disabled:cursor-not-allowed text-white transition-all"
-            >
+              className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-rose-500 hover:bg-rose-600 disabled:opacity-30 disabled:cursor-not-allowed text-white transition-all">
               {isLoading ? (
                 <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
               ) : (
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="currentColor">
                   <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" />
                 </svg>
               )}
@@ -582,7 +637,9 @@ export default function AriaPage() {
 
           <p className="text-[10px] text-gray-300 text-center mt-1.5">
             {listening
-              ? (language === "hi" ? "🎤 बोलिए…" : "🎤 Speak now — tap mic to stop")
+              ? language === "hi"
+                ? "🎤 बोलिए…"
+                : "🎤 Speak now — tap mic to stop"
               : "Enter to send · Shift+Enter for new line"}
           </p>
         </div>

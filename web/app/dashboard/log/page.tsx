@@ -6,7 +6,6 @@ import { PeriodLogForm } from "@/components/log/PeriodLogForm";
 import { MoodLogForm } from "@/components/log/MoodLogForm";
 import { SymptomLogForm } from "@/components/log/SymptomLogForm";
 import { MoodCalendar } from "@/components/log/MoodCalendar";
-import { WeeklySummaryCard } from "@/components/log/WeeklySummaryCard";
 import { WaterLogCard } from "@/components/log/WaterLogCard";
 import { MeditationLogForm } from "@/components/log/MeditationLogForm";
 import { SleepLogForm } from "@/components/log/SleepLogForm";
@@ -19,7 +18,6 @@ const TABS = [
   { id: "mood", label: "Mood", emoji: "😊" },
   { id: "meditation", label: "Meditation", emoji: "🧘‍♀️" },
   { id: "sleep", label: "Sleep", emoji: "😴" },
-  { id: "summary", label: "Summary", emoji: "📊" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -106,7 +104,6 @@ export default function LogPage() {
           {activeTab === "meditation" && <MeditationLogForm />}
           {activeTab === "sleep" && <SleepLogForm />}
           {activeTab === "mood" && <MoodCalendar refreshKey={moodRefreshKey} />}
-          {activeTab === "summary" && <WeeklySummaryCard />}
         </motion.div>
       </AnimatePresence>
     </div>
