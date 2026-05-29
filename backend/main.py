@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import settings
-from routers import auth,chat,health_log
+from routers import auth, chat, health_log, yoga, timer
 from pydantic import field_validator
 
 app = FastAPI(
@@ -31,11 +31,8 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(chat.router, prefix="/chat", tags=["chat"])
 app.include_router(health_log.router, prefix="/log", tags=["log"])
-
-# Future routers:
-# from routers import chat, health_log, yoga, timer
-# app.include_router(yoga.router, prefix="/yoga", tags=["yoga"])
-# app.include_router(timer.router, prefix="/timer", tags=["timer"])
+app.include_router(yoga.router, prefix="/yoga", tags=["yoga"])
+app.include_router(timer.router, prefix="/timer", tags=["timer"])
 
 
 @app.get("/health",tags=["meta"])

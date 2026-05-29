@@ -42,3 +42,8 @@ class ConversationDetailResponse(BaseModel):
     messages: list[MessageResponse]
 
     model_config = {"from_attributes": True}
+
+
+class TTSRequest(BaseModel):
+    text: str
+    language: str = "en"

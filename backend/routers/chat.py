@@ -18,7 +18,12 @@ from schemas.chat import (
     ConversationDetailResponse,
     ConversationResponse,
     MessageResponse,
+    TTSRequest,
 )
+from core.config import settings
+from fastapi import UploadFile, File
+from fastapi.responses import Response
+import httpx
 from services.ai import get_aria_response
 
 router = APIRouter()
@@ -199,3 +204,97 @@ async def delete_conversation(
     user = await _get_user(firebase_claims["uid"], db)
     conversation = await _get_conversation(conversation_id, user.id, db) 
     await db.delete(conversation)
+
+
+@router.post("/stt")
+async def speech_to_text(
+    file: UploadFile = File(...),
+    firebase_claims: dict = Depends(get_current_user), 
+) -> dict:
+    if not file:
+        raise HTTPException(status_code=400, detail="No audio file provided")
+    if file.content_type not in ["audio/webm", "audio/wav", "audio/mpeg"]:
+        raise HTTPException(status_code=400, detail="Unsupported audio format")
+    
+    if not firebase_claims:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+
+    audio_bytes = await file.read()
+
+    files = {
+        "file": (file.filename or "audio.webm", audio_bytes, file.content_type)
+    }
+    
+    data = {
+        "model": "saaras:v3" 
+    }
+    
+    headers = {
+        "api-subscription-key": settings.SARVAM_API_KEY
+    }
+    sarvam_url = settings.SARVAM_API_BASE_URL
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f"{sarvam_url}/speech-to-text",
+            files=files,
+            data=data,
+            headers=headers,
+            timeout=30.0 
+        )
+
+    if response.status_code != 200:
+        print("Sarvam Error:", response.text)
+        raise HTTPException(status_code=500, detail="Failed to transcribe audio")
+
+    result = response.json()
+    return {"text": result.get("transcript", "")}
+
+
+@router.post("/tts")
+async def text_to_speech(
+    payload: TTSRequest,
+    firebase_claims: dict = Depends(get_current_user),
+):
+    if not firebase_claims:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    headers = {
+        "api-subscription-key": settings.SARVAM_API_KEY,
+        "Content-Type": "application/json"
+    }
+
+    target_language = payload.language or "en"
+    data = {
+        "inputs": [payload.text],
+        "target_language_code": target_language,
+        "speaker": "meera",
+        "pitch": 0,
+        "pace": 1.05,
+        "loudness": 1.5,
+        "speech_sample_rate": 8000,
+        "enable_preprocessing": True,
+        "model": "bulbul:v1" 
+    }
+
+    sarvam_url = settings.SARVAM_API_BASE_URL
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f"{sarvam_url}/text-to-speech",
+            json=data,
+            headers=headers,
+            timeout=30.0 
+        )
+
+        if response.status_code != 200:
+            print("Sarvam TTS Error:", response.text)
+            raise HTTPException(status_code=500, detail="Failed to synthesize speech")
+        
+    result = response.json()
+    import base64
+    audio_base64 = result.get("audios", [])[0]
+    audio_bytes = base64.b64decode(audio_base64)
+
+    # Return the raw audio bytes directly to the frontend
+    return Response(content=audio_bytes, media_type="audio/wav")
