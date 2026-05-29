@@ -60,6 +60,7 @@ function mapUserProfile(data: Record<string, unknown>): UserProfile {
     email: (data.email as string) ?? null,
     name: (data.name as string) ?? null,
     dateOfBirth: (data.date_of_birth as string) ?? null,
+    createdAt: (data.created_at as string) ?? new Date().toISOString(),
     healthConcerns: (data.health_concerns as HealthConcern[]) ?? [],
     preferredLanguage: (data.preferred_language as Language) ?? "en",
     onboardingComplete: data.onboarding_complete as boolean,
