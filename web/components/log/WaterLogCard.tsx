@@ -131,23 +131,23 @@ export function WaterLogCard({ onUpdate }: { onUpdate?: (total: number) => void 
   const goalReached = totalMl >= DAILY_GOAL;
 
   return (
-    <Card className="border-gray-100 overflow-hidden">
-      <CardHeader className="pb-3">
+    <Card className="border-slate-100 bg-white shadow-xs rounded-2xl overflow-hidden">
+      <CardHeader className="pb-3 border-b border-slate-50">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-semibold text-gray-800 flex items-center gap-2">
+          <CardTitle className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
             💧 Water intake
           </CardTitle>
-          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+          <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-xl ${
             goalReached
-              ? "bg-sky-100 text-sky-600"
-              : "bg-gray-100 text-gray-500"
+              ? "bg-sky-50 text-sky-600 border border-sky-100/60"
+              : "bg-slate-50 text-slate-500 border border-slate-100"
           }`}>
             {goalReached ? "🎉 Goal reached!" : `${pct}% of goal`}
           </span>
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5 pt-4">
         {loading ? (
           <div className="h-20 flex items-center justify-center">
             <div className="w-5 h-5 border-2 border-sky-300 border-t-sky-500 rounded-full animate-spin" />
@@ -155,11 +155,11 @@ export function WaterLogCard({ onUpdate }: { onUpdate?: (total: number) => void 
         ) : (
           <>
             {/* Progress ring + total */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 bg-sky-50/10 rounded-2xl p-3 border border-sky-100/10">
               {/* Circular progress */}
               <div className="relative w-20 h-20 shrink-0">
                 <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
-                  <circle cx="40" cy="40" r="32" fill="none" stroke="#e0f2fe" strokeWidth="8" />
+                  <circle cx="40" cy="40" r="32" fill="none" stroke="#f0f9ff" strokeWidth="8" />
                   <motion.circle
                     cx="40" cy="40" r="32"
                     fill="none"
@@ -173,7 +173,7 @@ export function WaterLogCard({ onUpdate }: { onUpdate?: (total: number) => void 
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-lg font-bold text-sky-600 leading-none">
+                  <span className="text-lg font-black text-sky-600 leading-none">
                     {pct}%
                   </span>
                 </div>
@@ -186,18 +186,18 @@ export function WaterLogCard({ onUpdate }: { onUpdate?: (total: number) => void 
                     initial={{ scale: 1.2, color: "#0ea5e9" }}
                     animate={{ scale: 1, color: "#0369a1" }}
                     transition={{ duration: 0.3 }}
-                    className="text-3xl font-bold text-sky-700"
+                    className="text-3xl font-black text-sky-700"
                   >
                     {totalMl}
                   </motion.span>
-                  <span className="text-sm text-gray-400">/ {DAILY_GOAL} ml</span>
+                  <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">/ {DAILY_GOAL} ml</span>
                 </div>
-                <p className="text-xs text-gray-400 mt-0.5">
+                <p className="text-xs text-slate-500 mt-1 font-medium">
                   {DAILY_GOAL - totalMl > 0
                     ? `${DAILY_GOAL - totalMl} ml to go`
                     : "Daily goal achieved 🎉"}
                 </p>
-                <p className="text-xs text-gray-300 mt-1">
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">
                   {entries.length} entr{entries.length === 1 ? "y" : "ies"} today
                 </p>
               </div>
@@ -205,7 +205,7 @@ export function WaterLogCard({ onUpdate }: { onUpdate?: (total: number) => void 
 
             {/* Quick-add presets */}
             <div className="space-y-2">
-              <p className="text-xs font-medium text-gray-500">Quick add</p>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Quick add</p>
               <div className="grid grid-cols-4 gap-2">
                 {PRESETS.map((p) => (
                   <motion.button
@@ -213,10 +213,10 @@ export function WaterLogCard({ onUpdate }: { onUpdate?: (total: number) => void 
                     whileTap={{ scale: 0.93 }}
                     onClick={() => addWater(p.ml)}
                     disabled={adding !== null}
-                    className={`flex flex-col items-center py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                    className={`flex flex-col items-center py-2.5 rounded-xl border-2 transition-all ${
                       adding === p.ml
-                        ? "border-sky-300 bg-sky-50 text-sky-600"
-                        : "border-gray-200 text-gray-600 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-600"
+                        ? "border-sky-300 bg-sky-50 text-sky-700 font-bold shadow-xs"
+                        : "border-slate-100 hover:border-sky-200 hover:bg-sky-50/50 text-slate-600 hover:text-sky-700 bg-white"
                     } disabled:opacity-60`}
                   >
                     {adding === p.ml ? (
@@ -224,8 +224,8 @@ export function WaterLogCard({ onUpdate }: { onUpdate?: (total: number) => void 
                     ) : (
                       <span className="text-lg mb-0.5">{p.emoji}</span>
                     )}
-                    <span className="text-[11px] text-gray-500">{p.label}</span>
-                    <span className="text-[10px] text-gray-400">{p.ml}ml</span>
+                    <span className="text-[11px] font-bold text-slate-700">{p.label}</span>
+                    <span className="text-[10px] font-medium text-slate-400 mt-0.5">{p.ml}ml</span>
                   </motion.button>
                 ))}
               </div>
@@ -244,22 +244,22 @@ export function WaterLogCard({ onUpdate }: { onUpdate?: (total: number) => void 
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && customMl) addWater(Number(customMl));
                   }}
-                  className="w-full h-9 rounded-lg border border-gray-200 bg-white px-3 pr-10 text-sm text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-1 focus:ring-sky-300 focus:border-sky-300"
+                  className="w-full h-10 rounded-xl border border-slate-200 bg-background px-3.5 pr-10 text-xs text-slate-700 placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-sky-300 focus:border-sky-400 leading-relaxed transition-all duration-150"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-300">ml</span>
+                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 uppercase tracking-wider">ml</span>
               </div>
               <Button
                 size="sm"
                 onClick={() => customMl && addWater(Number(customMl))}
                 disabled={!customMl || adding !== null}
-                className="bg-sky-500 hover:bg-sky-600 text-white shrink-0"
+                className="bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-500 hover:to-sky-600 text-white rounded-xl h-10 font-bold shadow-sm px-4 text-xs transition-all shrink-0"
               >
                 Add
               </Button>
             </div>
 
             {error && (
-              <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+              <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-xl px-3 py-2">{error}</p>
             )}
 
             {/* Entry list */}
@@ -268,9 +268,9 @@ export function WaterLogCard({ onUpdate }: { onUpdate?: (total: number) => void 
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="space-y-1.5"
+                  className="space-y-2"
                 >
-                  <p className="text-xs font-medium text-gray-400">Today&apos;s entries</p>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Today&apos;s entries</p>
                   {[...entries].reverse().map((entry) => (
                     <motion.div
                       key={entry.id}
@@ -279,7 +279,7 @@ export function WaterLogCard({ onUpdate }: { onUpdate?: (total: number) => void 
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, x: -20, height: 0, marginBottom: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="flex items-center justify-between bg-sky-50/60 border border-sky-100 rounded-xl px-3 py-2"
+                      className="flex items-center justify-between bg-sky-50/20 border border-sky-100/50 rounded-xl px-3.5 py-2.5"
                     >
                       {editingId === entry.id ? (
                         <div className="flex items-center gap-2 flex-1">
@@ -290,20 +290,20 @@ export function WaterLogCard({ onUpdate }: { onUpdate?: (total: number) => void 
                             min={1}
                             max={5000}
                             autoFocus
-                            className="w-20 h-7 rounded-md border border-sky-300 px-2 text-sm focus:outline-none focus:ring-1 focus:ring-sky-400"
+                            className="w-20 h-8 rounded-xl border border-sky-200 bg-background px-2.5 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-sky-400"
                           />
-                          <span className="text-xs text-gray-400">ml</span>
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">ml</span>
                           <Button
                             size="sm"
                             onClick={() => updateEntry(entry.id, Number(editValue))}
                             disabled={!editValue}
-                            className="h-7 px-2 text-xs bg-sky-500 hover:bg-sky-600 text-white"
+                            className="h-8 px-3 text-xs bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold"
                           >
                             Save
                           </Button>
                           <button
                             onClick={() => setEditingId(null)}
-                            className="text-xs text-gray-400 hover:text-gray-600"
+                            className="text-xs text-slate-400 hover:text-slate-600 font-medium"
                           >
                             Cancel
                           </button>
@@ -311,23 +311,23 @@ export function WaterLogCard({ onUpdate }: { onUpdate?: (total: number) => void 
                       ) : (
                         <>
                           <div className="flex items-center gap-2">
-                            <span className="text-sky-500 font-semibold text-sm">
+                            <span className="text-sky-600 font-bold text-sm">
                               {entry.amount_ml} ml
                             </span>
-                            <span className="text-xs text-gray-400">
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                               {new Date(entry.logged_at).toLocaleTimeString("en-IN", {
                                 hour: "2-digit",
                                 minute: "2-digit",
                               })}
                             </span>
                           </div>
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-1.5">
                             <button
                               onClick={() => {
                                 setEditingId(entry.id);
                                 setEditValue(String(entry.amount_ml));
                               }}
-                              className="text-xs text-gray-400 hover:text-sky-500 transition-colors p-1"
+                              className="text-xs text-slate-400 hover:text-sky-500 transition-colors p-1"
                               title="Edit"
                             >
                               ✏️
@@ -335,7 +335,7 @@ export function WaterLogCard({ onUpdate }: { onUpdate?: (total: number) => void 
                             <button
                               onClick={() => deleteEntry(entry.id)}
                               disabled={deletingId === entry.id}
-                              className="text-xs text-gray-400 hover:text-red-400 transition-colors p-1 disabled:opacity-50"
+                              className="text-xs text-slate-400 hover:text-red-400 transition-colors p-1 disabled:opacity-50"
                               title="Delete"
                             >
                               {deletingId === entry.id ? (

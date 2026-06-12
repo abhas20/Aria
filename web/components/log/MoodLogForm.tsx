@@ -126,28 +126,28 @@ export function MoodLogForm({ onLogged }: { onLogged?: () => void }) {
     const moodOption = closestMoodOption(todayCheckin.mood_score);
 
     return (
-      <Card className="border-gray-100">
-        <CardHeader className="pb-2">
+      <Card className="border-slate-100 bg-white shadow-xs rounded-2xl overflow-hidden">
+        <CardHeader className="pb-3 border-b border-slate-50">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base font-semibold text-gray-800">
-              Today&apos;s mood
+            <CardTitle className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+              Today&apos;s mood check-in
             </CardTitle>
             <Button
               size="sm"
-              variant="ghost"
+              variant="outline"
               onClick={() => startEditing(todayCheckin)}
-              className="text-xs text-rose-500 hover:text-rose-600 hover:bg-rose-50 h-7 px-2"
+              className="text-xs border-rose-100 hover:bg-rose-50 text-rose-600 h-8 rounded-xl px-3"
             >
-              ✏️ Edit
+              ✏️ Edit Log
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4 pt-4">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">{moodOption.emoji}</span>
+            <span className="text-3xl p-1 bg-slate-50 rounded-2xl border border-slate-100">{moodOption.emoji}</span>
             <div>
-              <p className="font-semibold text-gray-800">{moodOption.label}</p>
-              <p className="text-xs text-gray-400">
+              <p className="font-bold text-slate-800 text-base">{moodOption.label}</p>
+              <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider mt-0.5">
                 Logged at{" "}
                 {new Date(todayCheckin.logged_at).toLocaleTimeString("en-IN", {
                   hour: "2-digit",
@@ -157,36 +157,42 @@ export function MoodLogForm({ onLogged }: { onLogged?: () => void }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="grid grid-cols-2 gap-3 text-sm">
             {todayCheckin.energy_level && (
-              <div className="bg-amber-200 rounded-lg px-3 py-2">
-                <p className="text-xs text-amber-600 font-medium">Energy</p>
-                <p className="font-semibold text-amber-800">{todayCheckin.energy_level}/10</p>
+              <div className="bg-amber-50/40 border border-amber-100/60 rounded-xl px-3.5 py-2.5">
+                <p className="text-[10px] text-amber-500 font-bold uppercase tracking-wider">Energy level</p>
+                <p className="font-black text-amber-700 text-lg mt-0.5">{todayCheckin.energy_level}/10</p>
               </div>
             )}
             {todayCheckin.stress_level && (
-              <div className="bg-purple-50 rounded-lg px-3 py-2">
-                <p className="text-xs text-purple-600 font-medium">Stress</p>
-                <p className="font-semibold text-purple-800">{todayCheckin.stress_level}/10</p>
+              <div className="bg-purple-50/40 border border-purple-100/60 rounded-xl px-3.5 py-2.5">
+                <p className="text-[10px] text-purple-500 font-bold uppercase tracking-wider">Stress level</p>
+                <p className="font-black text-purple-700 text-lg mt-0.5">{todayCheckin.stress_level}/10</p>
               </div>
             )}
           </div>
 
           {todayCheckin.mood_tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {todayCheckin.mood_tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full capitalize"
-                >
-                  {tag}
-                </span>
-              ))}
+            <div className="space-y-1">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Feelings</p>
+              <div className="flex flex-wrap gap-1.5">
+                {todayCheckin.mood_tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-xs bg-slate-50 border border-slate-100 text-slate-600 px-2.5 py-0.5 rounded-xl capitalize font-medium"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
 
           {todayCheckin.notes && (
-            <p className="text-sm text-gray-500 italic">&ldquo;{todayCheckin.notes}&rdquo;</p>
+            <div className="bg-slate-50 border border-slate-100/60 rounded-xl p-3">
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Notes</p>
+              <p className="text-xs text-slate-600 italic leading-relaxed">&ldquo;{todayCheckin.notes}&rdquo;</p>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -195,10 +201,10 @@ export function MoodLogForm({ onLogged }: { onLogged?: () => void }) {
 
   // Form (new or editing)
   return (
-    <Card className="border-gray-100">
-      <CardHeader className="pb-3">
+    <Card className="border-slate-100 bg-white shadow-xs rounded-2xl overflow-hidden">
+      <CardHeader className="pb-3 border-b border-slate-50">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-semibold text-gray-800">
+          <CardTitle className="text-sm font-bold text-slate-800 uppercase tracking-wider">
             {editing ? "Update today's check-in" : "How are you feeling today?"}
           </CardTitle>
           {editing && (
@@ -206,13 +212,14 @@ export function MoodLogForm({ onLogged }: { onLogged?: () => void }) {
               size="sm"
               variant="ghost"
               onClick={() => setEditing(false)}
-              className="text-xs text-gray-400 hover:text-gray-600 h-7 px-2">
+              className="text-xs text-slate-400 hover:text-slate-600 h-8 px-3 rounded-xl"
+            >
               Cancel
             </Button>
           )}
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-4">
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Mood selector */}
           <div className="space-y-2">
@@ -260,13 +267,12 @@ export function MoodLogForm({ onLogged }: { onLogged?: () => void }) {
           {/* Energy level */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <Label className="text-sm text-gray-600">Energy level</Label>
-              <span className="text-sm font-medium text-amber-600">
+              <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Energy level</Label>
+              <span className="text-sm font-bold text-amber-600">
                 {energyLevel[0]}/10
               </span>
             </div>
             <Slider
-              className="border-2 border-blue-300"
               min={1}
               max={10}
               step={1}
@@ -275,7 +281,7 @@ export function MoodLogForm({ onLogged }: { onLogged?: () => void }) {
                 setEnergyLevel(Array.isArray(v) ? [...v] : [v as number])
               }
             />
-            <div className="flex justify-between text-xs text-gray-400">
+            <div className="flex justify-between text-[10px] font-semibold uppercase tracking-wider text-slate-400">
               <span>Exhausted</span>
               <span>Energised</span>
             </div>
@@ -284,13 +290,12 @@ export function MoodLogForm({ onLogged }: { onLogged?: () => void }) {
           {/* Stress level */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <Label className="text-sm text-gray-600">Stress level</Label>
-              <span className="text-sm font-medium text-purple-600">
+              <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Stress level</Label>
+              <span className="text-sm font-bold text-purple-600">
                 {stressLevel[0]}/10
               </span>
             </div>
             <Slider
-              className="border-2 border-blue-300"
               min={1}
               max={10}
               step={1}
@@ -299,7 +304,7 @@ export function MoodLogForm({ onLogged }: { onLogged?: () => void }) {
                 setStressLevel(Array.isArray(v) ? [...v] : [v as number])
               }
             />
-            <div className="flex justify-between text-xs text-gray-400">
+            <div className="flex justify-between text-[10px] font-semibold uppercase tracking-wider text-slate-400">
               <span>Relaxed</span>
               <span>Very stressed</span>
             </div>
@@ -307,8 +312,8 @@ export function MoodLogForm({ onLogged }: { onLogged?: () => void }) {
 
           {/* Notes */}
           <div className="space-y-1.5">
-            <Label htmlFor="mood-notes" className="text-sm text-gray-600">
-              Notes <span className="text-gray-400">(optional)</span>
+            <Label htmlFor="mood-notes" className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              Notes <span className="text-slate-400 normal-case font-normal">(optional)</span>
             </Label>
             <textarea
               id="mood-notes"
@@ -316,12 +321,12 @@ export function MoodLogForm({ onLogged }: { onLogged?: () => void }) {
               onChange={(e) => setNotes(e.target.value)}
               placeholder="What's on your mind today?"
               rows={2}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+              className="w-full rounded-xl border border-slate-200 bg-background px-3.5 py-2.5 text-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus:border-indigo-400 resize-none leading-relaxed transition-all duration-150"
             />
           </div>
 
           {error && (
-            <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2">
+            <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
               {error}
             </p>
           )}
@@ -329,7 +334,8 @@ export function MoodLogForm({ onLogged }: { onLogged?: () => void }) {
           <Button
             type="submit"
             disabled={loading || selectedScore === null}
-            className="w-full bg-rose-500 hover:bg-rose-600 text-white">
+            className="w-full bg-gradient-to-r from-rose-500 to-indigo-600 hover:from-rose-600 hover:to-indigo-700 text-white rounded-xl h-11 font-bold shadow-md"
+          >
             {loading
               ? "Saving…"
               : editing

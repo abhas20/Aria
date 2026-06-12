@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,8 +43,8 @@ export function SymptomLogForm({ onLogged }: { onLogged?: () => void }) {
   const [error, setError] = useState("");
   const [editing, setEditing] = useState(false);
 
- const { today, patchCheckin } = useLogStore();
- const todayCheckin = today?.checkin ?? null;
+  const { today, patchCheckin } = useLogStore();
+  const todayCheckin = today?.checkin ?? null;
 
   function startEditing(checkin: CheckinResponse) {
     setSelected({ ...checkin.symptoms });
@@ -150,41 +150,41 @@ export function SymptomLogForm({ onLogged }: { onLogged?: () => void }) {
   const hasSymptoms = todayCheckin && Object.keys(todayCheckin.symptoms).length > 0;
   if (hasSymptoms && !editing) {
     return (
-      <Card className="border-gray-100">
-        <CardHeader className="pb-2">
+      <Card className="border-slate-100 bg-white shadow-xs rounded-2xl overflow-hidden">
+        <CardHeader className="pb-3 border-b border-slate-50">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base font-semibold text-gray-800">
+            <CardTitle className="text-sm font-bold text-slate-800 uppercase tracking-wider">
               Today&apos;s symptoms
             </CardTitle>
             <Button
               size="sm"
-              variant="ghost"
+              variant="outline"
               onClick={() => startEditing(todayCheckin!)}
-              className="text-xs text-orange-500 hover:text-orange-600 hover:bg-orange-50 h-7 px-2"
+              className="text-xs border-orange-100 hover:bg-orange-50 text-orange-600 h-8 rounded-xl px-3"
             >
-              ✏️ Edit
+              ✏️ Edit Symptoms
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4 pt-4">
           <div className="flex flex-wrap gap-2">
             {Object.entries(todayCheckin!.symptoms).map(([key, severity]) => {
               const tag = SYMPTOM_TAGS.find((t) => t.key === key);
               return (
                 <div
                   key={key}
-                  className="flex items-center gap-1.5 bg-orange-50 border border-orange-100 rounded-full px-3 py-1"
+                  className="flex items-center gap-1.5 bg-orange-50/40 border border-orange-100/60 rounded-xl px-3 py-1.5"
                 >
                   <span className="text-sm">{tag?.emoji ?? "•"}</span>
-                  <span className="text-sm text-orange-700 font-medium capitalize">
+                  <span className="text-xs text-orange-700 font-bold capitalize">
                     {tag?.label ?? key.replace("_", " ")}
                   </span>
-                  <span className="text-xs text-orange-400 ml-1">{severity}/5</span>
+                  <span className="text-[10px] text-orange-400 font-bold ml-1">{severity}/5</span>
                 </div>
               );
             })}
           </div>
-          <p className="text-xs text-gray-400">Part of today&apos;s check-in</p>
+          <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Part of today&apos;s check-in</p>
         </CardContent>
       </Card>
     );
@@ -194,10 +194,10 @@ export function SymptomLogForm({ onLogged }: { onLogged?: () => void }) {
   const isAddingToExisting = todayCheckin && !editing && !hasSymptoms;
 
   return (
-    <Card className="border-gray-100">
-      <CardHeader className="pb-3">
+    <Card className="border-slate-100 bg-white shadow-xs rounded-2xl overflow-hidden">
+      <CardHeader className="pb-3 border-b border-slate-50">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-semibold text-gray-800">
+          <CardTitle className="text-sm font-bold text-slate-800 uppercase tracking-wider">
             {editing ? "Update symptoms" : "Log symptoms"}
           </CardTitle>
           {editing && (
@@ -205,24 +205,24 @@ export function SymptomLogForm({ onLogged }: { onLogged?: () => void }) {
               size="sm"
               variant="ghost"
               onClick={() => setEditing(false)}
-              className="text-xs text-gray-400 hover:text-gray-600 h-7 px-2"
+              className="text-xs text-slate-400 hover:text-slate-600 h-8 px-3 rounded-xl"
             >
               Cancel
             </Button>
           )}
         </div>
         {isAddingToExisting && (
-          <p className="text-xs text-gray-400 mt-0.5">
+          <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider mt-1">
             Will be added to your existing check-in
           </p>
         )}
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <CardContent className="pt-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {/* Symptom chips */}
           <div className="space-y-2">
-            <Label className="text-sm text-gray-600">
-              Select symptoms <span className="text-gray-400">(tap to add)</span>
+            <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              Select symptoms <span className="text-slate-400 font-normal normal-case">(tap to add)</span>
             </Label>
             <div className="flex flex-wrap gap-2">
               {SYMPTOM_TAGS.map((tag) => {
@@ -232,10 +232,10 @@ export function SymptomLogForm({ onLogged }: { onLogged?: () => void }) {
                     key={tag.key}
                     type="button"
                     onClick={() => toggleSymptom(tag.key)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm font-medium transition-all ${
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium transition-all ${
                       isSelected
-                        ? "border-orange-300 bg-orange-50 text-orange-700"
-                        : "border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-gray-50"
+                        ? "border-orange-300 bg-orange-50 text-orange-700 font-semibold shadow-xs"
+                        : "border-slate-100 text-slate-500 hover:border-slate-200 hover:bg-slate-50/50 bg-white"
                     }`}
                   >
                     <span>{tag.emoji}</span>
@@ -248,18 +248,18 @@ export function SymptomLogForm({ onLogged }: { onLogged?: () => void }) {
 
           {/* Per-symptom severity sliders */}
           {Object.keys(selected).length > 0 && (
-            <div className="space-y-3 bg-orange-50/50 rounded-xl p-3 border border-orange-100">
-              <p className="text-xs font-medium text-orange-700">Severity (1 = mild, 5 = severe)</p>
+            <div className="space-y-4 bg-orange-50/20 rounded-2xl p-4 border border-orange-100/40">
+              <p className="text-xs font-bold text-orange-700 uppercase tracking-wider">Severity (1 = mild, 5 = severe)</p>
               {Object.entries(selected).map(([key, severity]) => {
                 const tag = SYMPTOM_TAGS.find((t) => t.key === key);
                 return (
-                  <div key={key} className="space-y-1">
+                  <div key={key} className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-700 flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-slate-600 flex items-center gap-1.5">
                         <span>{tag?.emoji}</span>
                         {tag?.label ?? key.replace("_", " ")}
                       </span>
-                      <span className="text-sm font-semibold text-orange-600">{severity}/5</span>
+                      <span className="text-xs font-black text-orange-600">{severity}/5</span>
                     </div>
                     <Slider
                       min={1} max={5} step={1}
@@ -275,8 +275,8 @@ export function SymptomLogForm({ onLogged }: { onLogged?: () => void }) {
           {/* Notes (only show when no existing checkin to avoid confusion) */}
           {!todayCheckin && (
             <div className="space-y-1.5">
-              <Label htmlFor="symptom-notes" className="text-sm text-gray-600">
-                Notes <span className="text-gray-400">(optional)</span>
+              <Label htmlFor="symptom-notes" className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                Notes <span className="text-slate-400 font-normal normal-case">(optional)</span>
               </Label>
               <textarea
                 id="symptom-notes"
@@ -284,19 +284,19 @@ export function SymptomLogForm({ onLogged }: { onLogged?: () => void }) {
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Any additional details…"
                 rows={2}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+                className="w-full rounded-xl border border-slate-200 bg-background px-3.5 py-2.5 text-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus:border-orange-400 resize-none leading-relaxed transition-all duration-150"
               />
             </div>
           )}
 
           {error && (
-            <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+            <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-xl px-3 py-2">{error}</p>
           )}
 
           <Button
             type="submit"
             disabled={loading || Object.keys(selected).length === 0}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+            className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-xl h-11 font-bold shadow-md transition-all"
           >
             {loading ? "Saving…" : editing ? "Update symptoms" : "Log symptoms"}
           </Button>

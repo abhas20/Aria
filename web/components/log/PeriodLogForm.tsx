@@ -47,15 +47,15 @@ function CyclePredictionCard({ prediction }: { prediction: CyclePrediction | nul
   const daysUntil = Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 
   return (
-    <Card className="border-rose-100 bg-rose-50/50">
+    <Card className="border-rose-100 bg-rose-50/20 shadow-xs rounded-2xl overflow-hidden">
       <CardContent className="pt-4 pb-4">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">🌸</span>
+          <span className="text-3xl p-1 bg-white rounded-2xl border border-rose-100/50 shadow-xs">🌸</span>
           <div>
-            <p className="text-sm font-medium text-rose-700">Next period predicted</p>
-            <p className="text-base font-semibold text-rose-900">{formatted}</p>
+            <p className="text-[10px] font-bold text-rose-500 uppercase tracking-wider">Next period predicted</p>
+            <p className="text-base font-black text-rose-900 mt-0.5">{formatted}</p>
             {daysUntil > 0 && (
-              <p className="text-xs text-rose-500 mt-0.5">
+              <p className="text-xs text-rose-600/80 font-medium mt-0.5">
                 in {daysUntil} day{daysUntil !== 1 ? "s" : ""}
                 {prediction.average_cycle_length && (
                   <> · avg cycle {prediction.average_cycle_length} days</>
@@ -121,35 +121,35 @@ function PeriodEditForm({
   }
 
   return (
-    <Card className="border-rose-200 bg-white">
-      <CardHeader className="pb-2">
+    <Card className="border-slate-100 bg-white shadow-xs rounded-2xl overflow-hidden">
+      <CardHeader className="pb-3 border-b border-slate-50">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-semibold text-gray-800">Edit period</CardTitle>
+          <CardTitle className="text-sm font-bold text-slate-800 uppercase tracking-wider">Edit period</CardTitle>
           <Button
             size="sm" variant="ghost"
             onClick={onCancel}
-            className="text-xs text-gray-400 hover:text-gray-600 h-7 px-2"
+            className="text-xs text-slate-400 hover:text-slate-600 h-8 px-3 rounded-xl"
           >
             Cancel
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSave} className="space-y-4">
+      <CardContent className="pt-4">
+        <form onSubmit={handleSave} className="space-y-5">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="edit-start" className="text-xs text-gray-500">Start date</Label>
+              <Label htmlFor="edit-start" className="text-xs font-bold text-slate-500 uppercase tracking-wider">Start date</Label>
               <Input
                 id="edit-start"
                 type="date"
                 value={startDate}
                 max={new Date().toISOString().split("T")[0]}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="h-8 text-sm"
+                className="h-10 text-xs rounded-xl border border-slate-200 bg-background px-3.5"
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="edit-end" className="text-xs text-gray-500">End date</Label>
+              <Label htmlFor="edit-end" className="text-xs font-bold text-slate-500 uppercase tracking-wider">End date</Label>
               <Input
                 id="edit-end"
                 type="date"
@@ -157,35 +157,36 @@ function PeriodEditForm({
                 min={startDate}
                 max={new Date().toISOString().split("T")[0]}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="h-8 text-sm"
+                className="h-10 text-xs rounded-xl border border-slate-200 bg-background px-3.5"
               />
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <Label className="text-xs text-gray-500">Flow intensity</Label>
+          <div className="space-y-2">
+            <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Flow intensity</Label>
             <div className="flex gap-2">
               {FLOW_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
                   type="button"
                   onClick={() => setFlow(opt.value)}
-                  className={`flex-1 py-1.5 px-2 rounded-lg border text-xs font-medium transition-all ${
+                  className={`flex-1 flex flex-col items-center py-2 px-3 rounded-xl border-2 text-xs font-bold transition-all capitalize ${
                     flow === opt.value
-                      ? "border-rose-400 bg-rose-50 text-rose-700"
-                      : "border-gray-200 text-gray-500 hover:border-gray-300"
+                      ? "border-rose-300 bg-rose-50 text-rose-700 shadow-xs"
+                      : "border-slate-100 text-slate-500 hover:border-rose-200 hover:bg-rose-50/20 bg-white"
                   }`}
                 >
-                  {opt.emoji} {opt.label}
+                  <span className="text-base mb-0.5">{opt.emoji}</span>
+                  {opt.label}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <div className="flex justify-between">
-              <Label className="text-xs text-gray-500">Pain level</Label>
-              <span className="text-xs font-medium text-gray-600">
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Pain level</Label>
+              <span className="text-xs font-black text-rose-600">
                 {painLevel[0] === 0 ? "None" : `${painLevel[0]}/10`}
               </span>
             </div>
@@ -202,32 +203,32 @@ function PeriodEditForm({
               type="checkbox"
               checked={clotPresence}
               onChange={(e) => setClotPresence(e.target.checked)}
-              className="w-4 h-4 accent-rose-500"
+              className="w-4 h-4 rounded-lg accent-rose-500 cursor-pointer"
             />
-            <Label htmlFor="edit-clot" className="text-xs text-gray-500 cursor-pointer">
+            <Label htmlFor="edit-clot" className="text-xs font-bold text-slate-500 uppercase tracking-wider cursor-pointer">
               Clot presence
             </Label>
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="edit-notes" className="text-xs text-gray-500">Notes</Label>
+            <Label htmlFor="edit-notes" className="text-xs font-bold text-slate-500 uppercase tracking-wider">Notes</Label>
             <textarea
               id="edit-notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+              className="w-full rounded-xl border border-slate-200 bg-background px-3.5 py-2.5 text-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus:border-rose-400 resize-none leading-relaxed transition-all duration-150"
             />
           </div>
 
           {error && (
-            <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+            <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-xl px-3 py-2">{error}</p>
           )}
 
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-rose-500 hover:bg-rose-600 text-white"
+            className="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white rounded-xl h-11 font-bold shadow-md transition-all"
           >
             {loading ? "Saving…" : "Save changes"}
           </Button>
@@ -261,41 +262,42 @@ function ActivePeriodCard({
   }
 
   return (
-    <Card className="border-rose-200 bg-white">
-      <CardHeader className="pb-2">
+    <Card className="border-slate-100 bg-white shadow-xs rounded-2xl overflow-hidden">
+      <CardHeader className="pb-3 border-b border-slate-50">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-medium text-rose-600 flex items-center gap-2">
+          <CardTitle className="text-sm font-bold text-rose-600 uppercase tracking-wider flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
             Active period
           </CardTitle>
           <Button
-            size="sm" variant="ghost"
+            size="sm"
+            variant="outline"
             onClick={onEdit}
-            className="text-xs text-rose-400 hover:text-rose-600 hover:bg-rose-50 h-7 px-2"
+            className="text-xs border-rose-100 hover:bg-rose-50 text-rose-600 h-8 rounded-xl px-3"
           >
-            ✏️ Edit
+            ✏️ Edit Period
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="text-sm text-gray-600">
-          Started{" "}
-          <span className="font-medium text-gray-800">
+      <CardContent className="space-y-4 pt-4">
+        <div className="text-xs text-slate-600 bg-rose-50/20 border border-rose-100/40 rounded-xl p-3 leading-relaxed">
+          Started <span className="font-bold text-rose-950">
             {new Date(period.start_date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
-          </span>{" "}
-          · Flow: <span className="capitalize font-medium">{period.flow_intensity}</span>
+          </span> · Flow: <span className="capitalize font-bold text-rose-800">{period.flow_intensity}</span>
           {period.pain_level && (
-            <> · Pain: <span className="font-medium">{period.pain_level}/10</span></>
+            <> · Pain: <span className="font-bold text-rose-800">{period.pain_level}/10</span></>
           )}
-          {period.clot_presence && <> · Clots: <span className="font-medium">Yes</span></>}
+          {period.clot_presence && <> · Clots: <span className="font-bold text-rose-800">Yes</span></>}
         </div>
 
         {period.notes && (
-          <p className="text-xs text-gray-400 italic">{period.notes}</p>
+          <p className="text-xs text-slate-500 bg-slate-50 border border-slate-100 rounded-xl px-3.5 py-2.5 italic">
+            &ldquo;{period.notes}&rdquo;
+          </p>
         )}
 
-        <div className="space-y-1">
-          <Label htmlFor="end-date" className="text-xs text-gray-500">Mark period ended</Label>
+        <div className="space-y-2 pt-2 border-t border-slate-50">
+          <Label htmlFor="end-date" className="text-xs font-bold text-slate-500 uppercase tracking-wider">Mark period ended</Label>
           <div className="flex gap-2">
             <Input
               id="end-date"
@@ -304,18 +306,19 @@ function ActivePeriodCard({
               min={period.start_date}
               max={new Date().toISOString().split("T")[0]}
               onChange={(e) => { setEndDate(e.target.value); setEndError(""); }}
-              className="h-8 text-sm"
+              className="h-10 text-xs rounded-xl border border-slate-200 bg-background px-3.5"
             />
             <Button
-              size="sm" variant="outline"
+              size="sm"
+              variant="outline"
               onClick={handleEnd}
               disabled={ending}
-              className="shrink-0 border-rose-200 text-rose-600 hover:bg-rose-50"
+              className="shrink-0 border-rose-200 text-rose-600 hover:bg-rose-50 rounded-xl h-10 text-xs font-bold px-4 transition-all"
             >
               {ending ? "Saving…" : "End period"}
             </Button>
           </div>
-          {endError && <p className="text-xs text-red-500">{endError}</p>}
+          {endError && <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-xl px-3 py-2">{endError}</p>}
         </div>
       </CardContent>
     </Card>
@@ -335,30 +338,32 @@ function PeriodHistoryList({
 
   return (
     <div className="space-y-2">
-      <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Past periods</p>
+      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Past periods</p>
       {history.map((p) => (
         <div
           key={p.id}
-          className="flex items-center justify-between bg-white border border-gray-100 rounded-xl px-3 py-2.5"
+          className="flex items-center justify-between bg-rose-50/10 border border-rose-100/30 rounded-xl px-3.5 py-2.5"
         >
-          <div className="text-sm">
-            <span className="font-medium text-gray-700">
+          <div className="text-xs">
+            <span className="font-bold text-slate-700">
               {new Date(p.start_date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
             </span>
             {p.end_date && (
-              <span className="text-gray-400">
+              <span className="text-slate-400 font-medium">
                 {" "}→{" "}
                 {new Date(p.end_date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
               </span>
             )}
-            <span className="ml-2 text-xs text-gray-400 capitalize">{p.flow_intensity}</span>
+            <span className="ml-2.5 text-[10px] font-black uppercase tracking-wider bg-rose-50 text-rose-600 px-2 py-0.5 rounded-md border border-rose-100/40">
+              {p.flow_intensity}
+            </span>
           </div>
           <Button
             size="sm" variant="ghost"
             onClick={() => onEdit(p)}
-            className="text-xs text-gray-400 hover:text-gray-600 h-6 px-2"
+            className="text-xs text-slate-400 hover:text-slate-600 h-7 px-2.5 rounded-lg border border-slate-100 hover:bg-white transition-all"
           >
-            ✏️
+            ✏️ Edit
           </Button>
         </div>
       ))}
@@ -520,14 +525,14 @@ export function PeriodLogForm() {
           ending={ending}
         />
       ) : (
-        <Card className="border-gray-100">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold text-gray-800">Log period</CardTitle>
+        <Card className="border-slate-100 bg-white shadow-xs rounded-2xl overflow-hidden">
+          <CardHeader className="pb-3 border-b border-slate-50">
+            <CardTitle className="text-sm font-bold text-slate-800 uppercase tracking-wider">Log period</CardTitle>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleStart} className="space-y-4">
+          <CardContent className="pt-4">
+            <form onSubmit={handleStart} className="space-y-5">
               <div className="space-y-1.5">
-                <Label htmlFor="start-date" className="text-sm text-gray-600">Start date</Label>
+                <Label htmlFor="start-date" className="text-xs font-bold text-slate-500 uppercase tracking-wider">Start date</Label>
                 <Input
                   id="start-date"
                   type="date"
@@ -535,22 +540,22 @@ export function PeriodLogForm() {
                   max={new Date().toISOString().split("T")[0]}
                   onChange={(e) => setStartDate(e.target.value)}
                   required
-                  className="h-9"
+                  className="h-10 text-xs rounded-xl border border-slate-200 bg-background px-3.5"
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <Label className="text-sm text-gray-600">Flow intensity</Label>
+              <div className="space-y-2">
+                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Flow intensity</Label>
                 <div className="flex gap-2">
                   {FLOW_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
                       type="button"
                       onClick={() => setFlow(opt.value)}
-                      className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-all ${
+                      className={`flex-1 flex flex-col items-center py-2 px-3 rounded-xl border-2 text-xs font-bold transition-all capitalize ${
                         flow === opt.value
-                          ? "border-rose-400 bg-rose-50 text-rose-700"
-                          : "border-gray-200 text-gray-500 hover:border-gray-300"
+                          ? "border-rose-300 bg-rose-50 text-rose-700 shadow-xs"
+                          : "border-slate-100 text-slate-500 hover:border-rose-200 hover:bg-rose-50/20 bg-white"
                       }`}
                     >
                       <span className="block text-base mb-0.5">{opt.emoji}</span>
@@ -562,8 +567,8 @@ export function PeriodLogForm() {
 
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <Label className="text-sm text-gray-600">Pain level</Label>
-                  <span className="text-sm font-medium text-gray-700">
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Pain level</Label>
+                  <span className="text-xs font-black text-rose-600">
                     {painLevel[0] === 0 ? "None" : `${painLevel[0]}/10`}
                   </span>
                 </div>
@@ -572,7 +577,7 @@ export function PeriodLogForm() {
                   value={painLevel}
                   onValueChange={(v) => setPainLevel(Array.isArray(v) ? [...v] : [v as number])}
                 />
-                <div className="flex justify-between text-xs text-gray-400">
+                <div className="flex justify-between text-[10px] font-semibold uppercase tracking-wider text-slate-400 pt-1">
                   <span>No pain</span><span>Severe</span>
                 </div>
               </div>
@@ -583,16 +588,16 @@ export function PeriodLogForm() {
                   type="checkbox"
                   checked={clotPresence}
                   onChange={(e) => setClotPresence(e.target.checked)}
-                  className="w-4 h-4 accent-rose-500"
+                  className="w-4 h-4 rounded-lg accent-rose-500 cursor-pointer"
                 />
-                <Label htmlFor="clot" className="text-sm text-gray-600 cursor-pointer">
+                <Label htmlFor="clot" className="text-xs font-bold text-slate-500 uppercase tracking-wider cursor-pointer">
                   Clot presence
                 </Label>
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="period-notes" className="text-sm text-gray-600">
-                  Notes <span className="text-gray-400">(optional)</span>
+                <Label htmlFor="period-notes" className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  Notes <span className="text-slate-400 font-normal normal-case">(optional)</span>
                 </Label>
                 <textarea
                   id="period-notes"
@@ -600,18 +605,18 @@ export function PeriodLogForm() {
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Any additional notes…"
                   rows={2}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+                  className="w-full rounded-xl border border-slate-200 bg-background px-3.5 py-2.5 text-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus:border-rose-400 resize-none leading-relaxed transition-all duration-150"
                 />
               </div>
 
               {error && (
-                <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+                <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-xl px-3 py-2">{error}</p>
               )}
 
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-rose-500 hover:bg-rose-600 text-white"
+                className="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white rounded-xl h-11 font-bold shadow-md transition-all"
               >
                 {loading ? "Logging…" : "Log period start"}
               </Button>
@@ -622,14 +627,14 @@ export function PeriodLogForm() {
 
       {/* Period history */}
       {history.filter((p) => p.id !== activePeriod?.id).length > 0 && (
-        <div>
+        <div className="space-y-2 pt-2">
           <button
             type="button"
             onClick={() => setShowHistory((v) => !v)}
-            className="text-xs text-gray-400 hover:text-gray-600 transition-colors flex items-center gap-1"
+            className="text-[10px] text-slate-400 hover:text-slate-600 font-bold uppercase tracking-wider transition-colors flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100/60 border border-slate-200/40 rounded-xl px-3 py-2 shadow-2xs"
           >
-            {showHistory ? "▲" : "▼"} {showHistory ? "Hide" : "Show"} history (
-            {history.filter((p) => p.id !== activePeriod?.id).length})
+            <span>{showHistory ? "▲" : "▼"}</span>
+            <span>{showHistory ? "Hide" : "Show"} history ({history.filter((p) => p.id !== activePeriod?.id).length})</span>
           </button>
           {showHistory && (
             <div className="mt-2">

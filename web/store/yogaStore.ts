@@ -38,6 +38,7 @@ interface YogaState {
   currentPoseScore: number;
   sessionStatus: SessionStatus;
   sessionHistory: YogaSessionRecord[];
+  isPaused: boolean;
 
   // Actions
   setPlans: (plans: SessionPlan[]) => void;
@@ -48,6 +49,7 @@ interface YogaState {
   completeSession: () => void;
   resetSession: () => void;
   setSessionHistory: (history: YogaSessionRecord[]) => void;
+  setPaused: (paused: boolean) => void;
 }
 
 export const useYogaStore = create<YogaState>()((set) => ({
@@ -57,21 +59,24 @@ export const useYogaStore = create<YogaState>()((set) => ({
   currentPoseScore: 0,
   sessionStatus: "idle",
   sessionHistory: [],
+  isPaused: false,
 
   setPlans: (plans) => set({ plans }),
   selectPlan: (plan) => set({ selectedPlan: plan }),
   startSession: () =>
-    set({ sessionStatus: "active", currentPoseIndex: 0, currentPoseScore: 0 }),
+    set({ sessionStatus: "active", currentPoseIndex: 0, currentPoseScore: 0, isPaused: false }),
   nextPose: () =>
-    set((state) => ({ currentPoseIndex: state.currentPoseIndex + 1 })),
+    set((state) => ({ currentPoseIndex: state.currentPoseIndex + 1, isPaused: false })),
   updatePoseScore: (score) => set({ currentPoseScore: score }),
-  completeSession: () => set({ sessionStatus: "complete" }),
+  completeSession: () => set({ sessionStatus: "complete", isPaused: false }),
   resetSession: () =>
     set({
       sessionStatus: "idle",
       currentPoseIndex: 0,
       currentPoseScore: 0,
       selectedPlan: null,
+      isPaused: false,
     }),
   setSessionHistory: (sessionHistory) => set({ sessionHistory }),
+  setPaused: (isPaused) => set({ isPaused }),
 }));

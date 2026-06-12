@@ -38,7 +38,6 @@ export default function LiveYogaTracker() {
   const [feedback, setFeedback] = useState("Loading AI Model...");
   const [poseScore, setPoseScore] = useState<number>(0);
 
-  // 2. Define the specific validation rules for each of the 5 foundational poses
   const poses: Record<YogaPose, PoseDefinition> = {
     baddha_konasana: {
       name: "Baddha Konasana (Bound Angle)",

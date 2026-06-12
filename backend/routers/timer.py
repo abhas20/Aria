@@ -120,3 +120,30 @@ async def get_history(
         .order_by(TimerSession.completed_at.desc())
     )
     return [TimerSessionResponse.model_validate(s) for s in result.scalars().all()]
+
+
+@router.delete(
+    "/history/{session_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=None,
+)
+async def delete_session(
+    session_id: uuid.UUID,
+    firebase_claims: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    """Delete a completed timer session."""
+    user = await _get_user(firebase_claims["uid"], db)
+    result = await db.execute(
+        select(TimerSession).where(
+            TimerSession.id == session_id,
+            TimerSession.user_id == user.id
+        )
+    )
+    session = result.scalar_one_or_none()
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": "session_not_found"},
+        )
+    await db.delete(session)

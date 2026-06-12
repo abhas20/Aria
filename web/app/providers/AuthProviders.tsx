@@ -34,15 +34,20 @@ export default function AuthProvider({
       async (firebaseUser) => {
         if (!firebaseUser) {
           clearAuth();
+          if (typeof window !== "undefined") {
+            document.cookie = "aria-auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+          }
           setLoading(false);
           return;
         }
 
         try {
           // User is signed in — fetch their profile from backend
-          // api.ts interceptor auto-injects the Firebase token
           const { data } = await api.get("/auth/me");
           setUser(mapUserProfile(data));
+          if (typeof window !== "undefined") {
+            document.cookie = "aria-auth=true; path=/; max-age=31536000; SameSite=Lax";
+          }
         } catch (err: unknown) {
           const status = (err as { response?: { status?: number } })?.response
             ?.status;
@@ -61,11 +66,20 @@ export default function AuthProvider({
               );
               const data = await res.json();
               setUser(mapUserProfile(data));
+              if (typeof window !== "undefined") {
+                document.cookie = "aria-auth=true; path=/; max-age=31536000; SameSite=Lax";
+              }
             } catch {
               clearAuth();
+              if (typeof window !== "undefined") {
+                document.cookie = "aria-auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+              }
             }
           } else {
             clearAuth();
+            if (typeof window !== "undefined") {
+              document.cookie = "aria-auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+            }
           }
         } finally {
           setLoading(false);

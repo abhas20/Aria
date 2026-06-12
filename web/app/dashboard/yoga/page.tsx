@@ -5,11 +5,19 @@ import { useYogaStore, SessionPlan } from "@/store/yogaStore";
 import { PlanSelector } from "@/components/yoga/PlanSelector";
 import { ActiveSession } from "@/components/yoga/ActiveSession";
 import { SessionSummary } from "@/components/yoga/SessionSummary";
+import { AskAIDoubt } from "@/components/yoga/AskAIDoubt";
 import { useRef } from "react";
 
 export default function YogaPage() {
-  const { sessionStatus, selectPlan, startSession, resetSession } =
-    useYogaStore();
+  const {
+    sessionStatus,
+    selectPlan,
+    startSession,
+    resetSession,
+    selectedPlan,
+    currentPoseIndex,
+    setPaused,
+  } = useYogaStore();
 
   // Track session results to pass to summary
   const summaryRef = useRef<{ durationSeconds: number; averageScore: number }>({
@@ -30,8 +38,10 @@ export default function YogaPage() {
     // completeSession() is already called inside ActiveSession
   }
 
+  const currentPose = selectedPlan?.poses[currentPoseIndex];
+
   return (
-    <div className="p-4 md:p-6">
+    <div className="p-4 md:p-6 min-h-[calc(100vh-80px)] pb-24 relative">
       <AnimatePresence mode="wait">
         {sessionStatus === "idle" && (
           <motion.div
@@ -74,6 +84,14 @@ export default function YogaPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Floating Ask AI Doubt Helper */}
+      <AskAIDoubt
+        currentPoseName={currentPose?.name}
+        selectedPlanName={selectedPlan?.name}
+        onOpen={() => setPaused(true)}
+        onClose={() => setPaused(false)}
+      />
     </div>
   );
 }

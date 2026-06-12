@@ -17,6 +17,9 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { useRequireAuth } from "../hooks/useAuth";
+import { signOut } from "@/lib/firebase";
+import { useChatStore } from "@/store/chatStore";
+import { useLogStore } from "@/store/logStore";
 
 const navItems = [
   { href: "/dashboard", label: "Overview", icon: Home },
@@ -37,15 +40,17 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, isLoading } = useRequireAuth();
-  const clearAuth = useAuthStore((state) => state.clearAuth);
 
   if (isLoading || !user) return null;
 
   const firstName = user.name?.split(" ")[0] ?? "there";
 
-  function handleSignOut() {
-    clearAuth();
-    router.push("/auth/login");
+  const handleSignOut = async () => {
+    await signOut();
+    useAuthStore.getState().clearAuth();
+    useLogStore.getState().clearLog();
+    useChatStore.getState().clearChat();
+    window.location.replace("/auth/login");
   }
 
   return (

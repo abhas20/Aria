@@ -83,7 +83,7 @@ export function WeeklySummaryCard() {
 
   if (loading) {
     return (
-      <Card className="border-gray-100">
+      <Card className="border-slate-100 bg-white shadow-xs rounded-2xl overflow-hidden">
         <CardContent className="pt-6 pb-6">
           <div className="h-24 flex items-center justify-center">
             <div className="w-5 h-5 border-2 border-rose-300 border-t-rose-500 rounded-full animate-spin" />
@@ -94,11 +94,11 @@ export function WeeklySummaryCard() {
   }
 
   return (
-    <Card className="border-gray-100">
-      <CardHeader className="pb-3">
+    <Card className="border-slate-100 bg-white shadow-xs rounded-2xl overflow-hidden">
+      <CardHeader className="pb-3 border-b border-slate-50">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <CardTitle className="text-base font-semibold text-gray-800 flex items-center gap-2">
+            <CardTitle className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2 flex-wrap">
               Your Weekly health summary
               {summary?.is_stale && (
                 <Badge
@@ -110,7 +110,7 @@ export function WeeklySummaryCard() {
               )}
             </CardTitle>
             {summary && (
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-slate-400 mt-1 font-semibold">
                 {formatWeekRange(summary.week_start, summary.week_end)}
               </p>
             )}
@@ -120,10 +120,10 @@ export function WeeklySummaryCard() {
             variant="outline"
             onClick={handleGenerate}
             disabled={generating}
-            className="shrink-0 text-xs border-rose-200 text-rose-600 hover:bg-rose-50"
+            className="shrink-0 text-xs border-rose-100 hover:bg-rose-50 text-rose-600 h-8 rounded-xl px-3"
           >
             {generating ? (
-              <span className="flex items-center gap-1.5">
+              <span className="flex items-center gap-1.5 font-bold">
                 <span className="w-3 h-3 border border-rose-400 border-t-transparent rounded-full animate-spin" />
                 Generating…
               </span>
@@ -134,9 +134,9 @@ export function WeeklySummaryCard() {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 pt-4">
         {error && (
-          <p className="text-sm text-amber-600 bg-amber-50 rounded-lg px-3 py-2 border border-amber-100">
+          <p className="text-xs text-amber-600 bg-amber-50 rounded-xl px-3.5 py-2.5 border border-amber-100">
             {error}
           </p>
         )}
@@ -144,9 +144,9 @@ export function WeeklySummaryCard() {
         {!summary && !error && (
           <div className="text-center py-6 space-y-2">
             <p className="text-3xl">📊</p>
-            <p className="text-sm text-gray-500">No summary yet</p>
-            <p className="text-xs text-gray-400">
-              Log at least 7 days of health data, then generate your first summary.
+            <p className="text-sm font-bold text-slate-800 uppercase tracking-wider">No summary yet</p>
+            <p className="text-xs text-slate-400 font-medium">
+              Log at least 7 days of data, then generate your first summary.
             </p>
           </div>
         )}
@@ -155,9 +155,9 @@ export function WeeklySummaryCard() {
           <>
             {/* Staleness indicator */}
             {summary.is_stale && (
-              <div className="flex items-center gap-2 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+              <div className="flex items-center gap-2 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2">
                 <span className="text-amber-500">⚠️</span>
-                <p className="text-xs text-amber-700">
+                <p className="text-xs text-amber-700 font-medium">
                   This summary may be outdated. Generate a new one when the AI service is available.
                 </p>
               </div>
@@ -165,22 +165,22 @@ export function WeeklySummaryCard() {
 
             {/* Summary text */}
             <div className="prose prose-sm max-w-none">
-              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+              <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
                 {summary.summary_text}
               </p>
             </div>
 
             {/* Tips */}
             {summary.tips.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <div className="space-y-2 pt-3 border-t border-slate-50">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                   Tips for this week
                 </p>
                 <ul className="space-y-2">
                   {summary.tips.map((tip, i) => (
                     <li
                       key={i}
-                      className="flex items-start gap-2 text-sm text-gray-600"
+                      className="flex items-start gap-2 text-xs font-semibold text-slate-600 leading-relaxed"
                     >
                       <span className="text-rose-400 mt-0.5 shrink-0">✦</span>
                       {tip}
@@ -191,7 +191,7 @@ export function WeeklySummaryCard() {
             )}
 
             {/* Generated at */}
-            <p className="text-xs text-gray-300 text-right">
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider text-right">
               Generated{" "}
               {new Date(summary.generated_at).toLocaleDateString("en-IN", {
                 day: "numeric",

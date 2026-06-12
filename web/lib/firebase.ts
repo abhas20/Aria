@@ -65,6 +65,11 @@ async function handleSuccessfulSignIn(
 
   const data = await res.json();
   useAuthStore.getState().setUser(mapUserProfile(data));
+
+  // Write authentication cookie for Next.js middleware
+  if (typeof window !== "undefined") {
+    document.cookie = "aria-auth=true; path=/; max-age=31536000; SameSite=Lax";
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -92,6 +97,11 @@ export async function signInWithEmail(
 export async function signOut(): Promise<void> {
   await firebaseSignOut(firebaseAuth);
   useAuthStore.getState().clearAuth();
+
+  // Clear authentication cookie for Next.js middleware
+  if (typeof window !== "undefined") {
+    document.cookie = "aria-auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+  }
 }
 
 export async function getAuthToken(): Promise<string | null> {

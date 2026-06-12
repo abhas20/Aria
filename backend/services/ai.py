@@ -126,13 +126,13 @@ FORBIDDEN:
     return prompt
 
 
-def _build_history(messages: list[dict]) -> list[types.Content]:
-    """Convert DB messages to new SDK Content format."""
+def _build_history(messages: list[dict]) -> list[types.ContentOrDict]:
+    """Convert DB messages to new SDK ContentOrDict format for the SDK create() call."""
     return [
-        types.Content(
-            role=msg["role"],  # "user" or "model"
-            parts=[types.Part(text=msg["content"])]
-        )
+        {
+            "role": msg["role"],  # "user" or "model"
+            "parts": [{"text": msg["content"]}],
+        }
         for msg in messages
     ]
 
@@ -160,7 +160,7 @@ async def get_aria_response(
     health_concerns: list[str],
     preferred_language: str,
     weekly_summary: str | None = None,
-) -> str:
+) -> str | None:
     """Get Dr. Aria's response with safety checks, disclaimer, and language enforcement."""
 
     system_prompt = _build_system_prompt(
@@ -184,10 +184,10 @@ async def get_aria_response(
     reply = response.text
 
     # Append disclaimer
-    reply += _get_disclaimer(preferred_language)
-
-    # Prepend safety message if emergency keywords detected
-    if _detect_safety_keywords(user_message):
-        reply = _get_safety_message(preferred_language) + reply
+    if(reply):
+        reply += _get_disclaimer(preferred_language)
+       # Prepend safety message if emergency keywords detected
+        if _detect_safety_keywords(user_message):
+            reply = _get_safety_message(preferred_language) + reply
 
     return reply

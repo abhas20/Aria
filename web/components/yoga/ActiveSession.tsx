@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useYogaStore } from "@/store/yogaStore";
+import { Play, Pause, AlertTriangle } from "lucide-react";
 import {
   initPoseLandmarker,
   detectPose,
@@ -30,6 +31,9 @@ export function ActiveSession({ onComplete }: ActiveSessionProps) {
     nextPose,
     updatePoseScore,
     completeSession,
+    resetSession,
+    isPaused,
+    setPaused,
   } = useYogaStore();
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -45,9 +49,28 @@ export function ActiveSession({ onComplete }: ActiveSessionProps) {
   const [noLandmark, setNoLandmark] = useState(false);
   const [poseTimer, setPoseTimer] = useState(0);
   const [mediapipeReady, setMediapipeReady] = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   const poses = selectedPlan?.poses ?? [];
   const currentPose = poses[currentPoseIndex];
+
+  const handleExitEarly = useCallback((save: boolean) => {
+    setShowExitConfirm(false);
+    if (save) {
+      const durationSeconds = Math.round(
+        (Date.now() - sessionStartRef.current) / 1000
+      );
+      const scores = scoreHistoryRef.current;
+      const avgScore =
+        scores.length > 0
+          ? scores.reduce((a, b) => a + b, 0) / scores.length
+          : 0;
+      completeSession();
+      onComplete(durationSeconds, avgScore);
+    } else {
+      resetSession();
+    }
+  }, [completeSession, onComplete, resetSession]);
 
   // ── Score colour ──────────────────────────────────────────────────────────
   const scoreColor =
@@ -60,26 +83,6 @@ export function ActiveSession({ onComplete }: ActiveSessionProps) {
   const correctiveCue = currentPose
     ? getCorrectiveCue(currentPoseScore, currentPose.name)
     : null;
-
-  // ── Pose hold countdown ───────────────────────────────────────────────────
-  useEffect(() => {
-    if (!currentPose) return;
-    setPoseTimer(currentPose.holdDurationSeconds);
-
-    const interval = setInterval(() => {
-      setPoseTimer((t) => {
-        if (t <= 1) {
-          clearInterval(interval);
-          handleAdvancePose();
-          return 0;
-        }
-        return t - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPoseIndex]);
 
   // ── Advance pose / complete session ──────────────────────────────────────
   const handleAdvancePose = useCallback(() => {
@@ -100,6 +103,31 @@ export function ActiveSession({ onComplete }: ActiveSessionProps) {
       nextPose();
     }
   }, [currentPoseIndex, poses.length, selectedPlan, nextPose, completeSession, onComplete]);
+
+  // Reset timer on pose change
+  useEffect(() => {
+    if (currentPose) {
+      setPoseTimer(currentPose.holdDurationSeconds);
+    }
+  }, [currentPoseIndex, currentPose]);
+
+  // ── Pose hold countdown ───────────────────────────────────────────────────
+  useEffect(() => {
+    if (!currentPose || isPaused) return;
+
+    const interval = setInterval(() => {
+      setPoseTimer((t) => {
+        if (t <= 1) {
+          clearInterval(interval);
+          handleAdvancePose();
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [currentPose, isPaused, handleAdvancePose]);
 
   // ── Camera setup ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -147,11 +175,12 @@ export function ActiveSession({ onComplete }: ActiveSessionProps) {
 
   // ── Detection loop ────────────────────────────────────────────────────────
   useEffect(() => {
-    if (!mediapipeReady) return;
+    if (!mediapipeReady || isPaused) return;
 
     const interval = 1000 / DETECTION_FPS;
 
     function loop() {
+      if (isPaused) return;
       rafRef.current = requestAnimationFrame(loop);
       const now = performance.now();
       if (now - lastDetectionRef.current < interval) return;
@@ -204,7 +233,7 @@ export function ActiveSession({ onComplete }: ActiveSessionProps) {
 
     rafRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [mediapipeReady, currentPose, updatePoseScore]);
+  }, [mediapipeReady, currentPose, updatePoseScore, isPaused]);
 
   if (!currentPose) return null;
 
@@ -214,14 +243,15 @@ export function ActiveSession({ onComplete }: ActiveSessionProps) {
     100;
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* ── Left: Camera ─────────────────────────────────────────────── */}
-        <div className="relative rounded-2xl overflow-hidden bg-gray-900 aspect-[4/3]">
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        {/* ── Left: Camera & HUD ────────────────────────────────────────── */}
+        <div className="relative rounded-2xl overflow-hidden bg-slate-950 aspect-[4/3] shadow-lg border border-slate-800">
           {cameraError ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-slate-900">
               <span className="text-4xl mb-3">📷</span>
-              <p className="text-white text-sm">{cameraError}</p>
+              <p className="text-white text-sm font-medium">{cameraError}</p>
             </div>
           ) : (
             <>
@@ -235,26 +265,107 @@ export function ActiveSession({ onComplete }: ActiveSessionProps) {
                 ref={canvasRef}
                 className="absolute inset-0 w-full h-full scale-x-[-1]"
               />
+
+              {/* HUD scoring status indicator */}
+              {mediapipeReady && !isPaused && !showExitConfirm && (
+                <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-xs px-2.5 py-1.5 rounded-xl border border-slate-700/30">
+                  <span className={`h-2.5 w-2.5 rounded-full ${noLandmark ? "bg-rose-500 animate-pulse" : "bg-emerald-500 animate-pulse"}`} />
+                  <span className="text-[10px] text-white/90 font-bold tracking-wider uppercase">
+                    {noLandmark ? "Aria looking for you" : "AI Scoring Active"}
+                  </span>
+                </div>
+              )}
+
+              {/* Pause overlay */}
               <AnimatePresence>
-                {noLandmark && (
+                {isPaused && !showExitConfirm && (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="absolute inset-0 flex items-center justify-center bg-black/50"
+                    className="absolute inset-0 flex items-center justify-center bg-slate-950/80 backdrop-blur-xs z-10"
+                  >
+                    <div className="text-center text-white px-6">
+                      <p className="text-2xl font-serif font-bold">Practice Paused</p>
+                      <p className="text-xs text-slate-300 mt-1.5 max-w-[240px] mx-auto leading-relaxed">
+                        Aria is waiting. Ask a doubt or click resume to continue.
+                      </p>
+                      <Button
+                        onClick={() => setPaused(false)}
+                        className="mt-5 bg-gradient-to-r from-rose-500 to-indigo-600 hover:from-rose-600 hover:to-indigo-700 text-white rounded-xl gap-2 shadow-lg shadow-indigo-500/20"
+                      >
+                        <Play className="h-4 w-4 fill-current" /> Resume Practice
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Exit early confirmation overlay */}
+                {showExitConfirm && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 flex items-center justify-center bg-slate-950/90 backdrop-blur-xs z-20"
+                  >
+                    <div className="text-center text-white p-6 max-w-sm">
+                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-rose-500/20 text-rose-300 mb-3">
+                        <AlertTriangle className="h-6 w-6" />
+                      </div>
+                      <p className="text-xl font-bold font-serif">End Practice Early?</p>
+                      <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+                        Would you like to save your progress so far, discard this practice session, or continue your flow?
+                      </p>
+                      <div className="flex flex-col gap-2.5 mt-5">
+                        <Button
+                          onClick={() => handleExitEarly(true)}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl h-10 text-xs font-bold shadow-md"
+                        >
+                          Save Progress So Far
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          onClick={() => handleExitEarly(false)}
+                          className="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl h-10 text-xs font-bold"
+                        >
+                          Discard Session
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setShowExitConfirm(false);
+                            setPaused(false);
+                          }}
+                          className="border-white/10 hover:bg-white/10 text-white rounded-xl h-10 text-xs font-bold"
+                        >
+                          Keep Practicing
+                        </Button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Move into frame alert */}
+                {noLandmark && !isPaused && !showExitConfirm && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 flex items-center justify-center bg-black/55 backdrop-blur-3xs"
                   >
                     <div className="text-center text-white">
-                      <p className="text-lg font-semibold">Move into frame</p>
-                      <p className="text-sm text-gray-300 mt-1">
-                        Make sure your full body is visible
+                      <p className="text-lg font-bold">Move into frame</p>
+                      <p className="text-xs text-slate-300 mt-1 max-w-[200px] mx-auto leading-normal">
+                        Make sure your full body is visible to the camera
                       </p>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
+
               {!mediapipeReady && (
                 <div className="absolute top-2 left-2">
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="secondary" className="text-xs bg-slate-900/80 text-white border-0">
                     Loading AI…
                   </Badge>
                 </div>
@@ -263,21 +374,53 @@ export function ActiveSession({ onComplete }: ActiveSessionProps) {
           )}
         </div>
 
-        {/* ── Right: Pose info ──────────────────────────────────────────── */}
+        {/* ── Right: Pose info & metrics ────────────────────────────────── */}
         <div className="flex flex-col justify-between space-y-4">
-          {/* Progress */}
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-500">
+          
+          {/* Progress & Controls */}
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
               Pose {currentPoseIndex + 1} of {poses.length}
             </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-gray-400 text-xs"
-              onClick={handleAdvancePose}
-            >
-              Skip pose →
-            </Button>
+            <div className="flex items-center gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-xl h-8 text-xs border-indigo-100 hover:bg-indigo-50 text-indigo-600 gap-1"
+                onClick={() => setPaused(!isPaused)}
+              >
+                {isPaused ? (
+                  <>
+                    <Play className="h-3.5 w-3.5 fill-current" /> Resume
+                  </>
+                ) : (
+                  <>
+                    <Pause className="h-3.5 w-3.5" /> Pause
+                  </>
+                )}
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-xl h-8 text-xs border-rose-100 hover:bg-rose-50 text-rose-600 gap-1.5"
+                onClick={() => {
+                  setPaused(true);
+                  setShowExitConfirm(true);
+                }}
+              >
+                End Early
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-slate-400 hover:text-slate-600 text-xs rounded-xl h-8"
+                onClick={handleAdvancePose}
+              >
+                Skip →
+              </Button>
+            </div>
           </div>
 
           {/* Pose name */}
@@ -288,33 +431,36 @@ export function ActiveSession({ onComplete }: ActiveSessionProps) {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.25 }}
+              className="py-1"
             >
-              <h2 className="text-2xl font-bold text-gray-800">
+              <h2 className="text-3xl font-bold font-serif text-slate-800 leading-tight">
                 {currentPose.name}
               </h2>
-              <p className="text-sm text-indigo-400 italic mt-0.5">
+              <p className="text-sm font-medium text-indigo-500 italic mt-0.5">
                 {currentPose.sanskritName}
               </p>
             </motion.div>
           </AnimatePresence>
 
-          {/* Score */}
-          <div className="bg-gray-50 rounded-2xl p-4 space-y-2">
+          {/* Score dashboard */}
+          <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-3 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-500">Pose Score</span>
-              <span className={`text-3xl font-bold ${scoreColor}`}>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                Alignment Accuracy
+              </span>
+              <span className={`text-3xl font-black ${scoreColor}`}>
                 {currentPoseScore}
-                <span className="text-base font-normal text-gray-400">/100</span>
+                <span className="text-xs font-normal text-slate-400 ml-0.5">/100</span>
               </span>
             </div>
-            <Progress value={currentPoseScore} className="h-2" />
+            <Progress value={currentPoseScore} className="h-2 bg-slate-200" />
             <AnimatePresence>
               {correctiveCue && (
                 <motion.p
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2"
+                  className="text-xs text-amber-700 bg-amber-50/50 border border-amber-100/50 rounded-xl px-3 py-2 leading-relaxed"
                 >
                   💡 {correctiveCue}
                 </motion.p>
@@ -323,12 +469,14 @@ export function ActiveSession({ onComplete }: ActiveSessionProps) {
           </div>
 
           {/* Hold timer */}
-          <div className="bg-indigo-50 rounded-2xl p-4 text-center">
-            <p className="text-xs text-indigo-400 uppercase tracking-wide mb-1">
-              Hold for
+          <div className="bg-indigo-50/60 border border-indigo-100/50 rounded-2xl p-5 text-center shadow-xs">
+            <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">
+              Hold Duration
             </p>
-            <p className="text-5xl font-bold text-indigo-600">{poseTimer}s</p>
-            <Progress value={holdProgress} className="h-1.5 mt-3" />
+            <p className="text-5xl font-black text-indigo-600 tracking-tight tabular-nums">
+              {poseTimer}s
+            </p>
+            <Progress value={holdProgress} className="h-1.5 mt-3.5 bg-indigo-100" />
           </div>
         </div>
       </div>

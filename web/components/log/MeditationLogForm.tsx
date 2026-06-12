@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,13 +31,13 @@ const MEDITATION_TYPES = [
     key: "breathing",
     label: "Breathing",
     emoji: "🌬️",
-    description: "Pranayama & breathwork",
+    description: "Breathwork & pranayama",
   },
   {
     key: "yoga_nidra",
     label: "Yoga Nidra",
     emoji: "🌙",
-    description: "Yogic sleep & deep rest",
+    description: "Deep relaxation & rest",
   },
   {
     key: "guided",
@@ -144,56 +144,54 @@ export function MeditationLogForm() {
     );
 
     return (
-      <Card className="border-gray-100">
-        <CardHeader className="pb-2">
+      <Card className="border-slate-100 bg-white shadow-xs rounded-2xl overflow-hidden">
+        <CardHeader className="pb-3 border-b border-slate-50">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base font-semibold text-gray-800">
+            <CardTitle className="text-sm font-bold text-slate-800 uppercase tracking-wider">
               Today&apos;s meditation
             </CardTitle>
             <Button
               size="sm"
-              variant="ghost"
+              variant="outline"
               onClick={() => startEditing(todayLog)}
-              className="text-xs text-violet-500 hover:text-violet-600 hover:bg-violet-50 h-7 px-2">
-              ✏️ Edit
+              className="text-xs border-violet-100 hover:bg-violet-50 text-violet-600 h-8 rounded-xl px-3">
+              ✏️ Edit Meditation
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4 pt-4">
           <div className="flex items-center gap-4">
             {/* Duration ring */}
-            <div className="w-16 h-16 rounded-2xl bg-violet-50 border border-violet-100 flex flex-col items-center justify-center shrink-0">
-              <span className="text-xl font-semibold text-violet-600 leading-none">
+            <div className="w-16 h-16 rounded-2xl bg-violet-50/40 border border-violet-100/60 flex flex-col items-center justify-center shrink-0">
+              <span className="text-xl font-black text-violet-600 leading-none">
                 {todayLog.duration_minutes}
               </span>
-              <span className="text-[10px] text-violet-400 font-medium">
+              <span className="text-[10px] text-violet-500 font-bold uppercase tracking-wider mt-0.5">
                 min
               </span>
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="text-base">{type?.emoji ?? "🧘"}</span>
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-bold text-slate-800">
                   {type?.label ?? todayLog.meditation_type}
                 </span>
               </div>
-              <p className="text-xs text-gray-400">{type?.description}</p>
-              <p className="text-xs text-gray-300">Logged at {loggedTime}</p>
+              <p className="text-xs text-slate-500">{type?.description}</p>
+              <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Logged at {loggedTime}</p>
             </div>
           </div>
-            {todayLog.meditation_name && (
-                <div className="flex items-center gap-2">
-                    <span className="text-green-900 font-bold">Meditation Name: </span>
-                    <span className="text-base">{type?.emoji ?? "🧘"}</span>
-                    <span className="text-sm font-medium text-gray-700">
-                        {todayLog.meditation_name}
-                    </span>
-                </div>
-
-            )}
+          {todayLog.meditation_name && (
+            <div className="flex items-center gap-2 bg-slate-50 border border-slate-100/60 rounded-xl px-3 py-1.5 w-fit">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Session name:</span>
+              <span className="text-xs font-semibold text-slate-700">
+                {todayLog.meditation_name}
+              </span>
+            </div>
+          )}
 
           {todayLog.notes && (
-            <p className="text-xs text-gray-500 bg-violet-50/60 rounded-lg px-3 py-2 italic">
+            <p className="text-xs text-slate-500 bg-violet-50/20 border border-violet-100/20 rounded-xl px-3.5 py-2.5 italic">
               &quot;{todayLog.notes}&quot;
             </p>
           )}
@@ -205,10 +203,10 @@ export function MeditationLogForm() {
   // ── Form ─────────────────────────────────────────────────────────────────
 
   return (
-    <Card className="border-gray-100">
-      <CardHeader className="pb-3">
+    <Card className="border-slate-100 bg-white shadow-xs rounded-2xl overflow-hidden">
+      <CardHeader className="pb-3 border-b border-slate-50">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-semibold text-gray-800">
+          <CardTitle className="text-sm font-bold text-slate-800 uppercase tracking-wider">
             {editing ? "Update meditation" : "Log meditation"}
           </CardTitle>
           {editing && (
@@ -216,55 +214,55 @@ export function MeditationLogForm() {
               size="sm"
               variant="ghost"
               onClick={() => setEditing(false)}
-              className="text-xs text-gray-400 hover:text-gray-600 h-7 px-2">
+              className="text-xs text-slate-400 hover:text-slate-600 h-8 px-3 rounded-xl">
               Cancel
             </Button>
           )}
         </div>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="pt-4">
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* ── Meditation name ──────────────────────────────────────────────── */}
-            <div className="space-y-1.5">
-                <Label htmlFor="meditation-name" className="text-sm text-gray-600">
-                    Name <span className="text-gray-400">(optional)</span>
-                </Label>
-                <input
-                    id="meditation-name"
-                    type="text"
-                    value={meditationName}
-                    onChange={(e) => setMeditationName(e.target.value)}
-                    placeholder="e.g. Morning mindfulness, Evening wind-down"
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                />
-            </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="meditation-name" className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              Name <span className="text-slate-400 font-normal normal-case">(optional)</span>
+            </Label>
+            <input
+              id="meditation-name"
+              type="text"
+              value={meditationName}
+              onChange={(e) => setMeditationName(e.target.value)}
+              placeholder="e.g. Morning mindfulness, Evening wind-down"
+              className="w-full rounded-xl border border-slate-200 bg-background px-3.5 py-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus:border-violet-400 leading-relaxed transition-all duration-150 h-10"
+            />
+          </div>
 
           {/* ── Meditation type ─────────────────────────────────────── */}
           <div className="space-y-2">
-            <Label className="text-sm text-gray-600">Type</Label>
+            <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Type</Label>
             <div className="grid grid-cols-2 gap-2">
               {MEDITATION_TYPES.map((t) => (
                 <button
                   key={t.key}
                   type="button"
                   onClick={() => setMeditationType(t.key)}
-                  className={`flex items-start gap-2.5 px-3 py-2.5 rounded-xl border text-left transition-all ${
+                  className={`flex items-start gap-2.5 px-3.5 py-3 rounded-xl border-2 text-left transition-all ${
                     meditationType === t.key
-                      ? "border-violet-300 bg-violet-50 text-violet-700"
-                      : "border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-gray-50"
+                      ? "border-violet-300 bg-violet-50/50 text-violet-700 shadow-xs"
+                      : "border-slate-100 text-slate-500 hover:border-violet-200 hover:bg-violet-50/10 bg-white"
                   }`}>
                   <span className="text-lg shrink-0 mt-0.5">{t.emoji}</span>
                   <div>
                     <p
-                      className={`text-sm font-medium leading-tight ${
+                      className={`text-sm font-bold leading-tight ${
                         meditationType === t.key
                           ? "text-violet-700"
-                          : "text-gray-700"
+                          : "text-slate-700"
                       }`}>
                       {t.label}
                     </p>
-                    <p className="text-[11px] text-gray-400 leading-tight mt-0.5">
+                    <p className="text-[11px] text-slate-400 leading-tight mt-0.5">
                       {t.description}
                     </p>
                   </div>
@@ -275,7 +273,7 @@ export function MeditationLogForm() {
 
           {/* ── Duration ────────────────────────────────────────────── */}
           <div className="space-y-2">
-            <Label className="text-sm text-gray-600">Duration</Label>
+            <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Duration</Label>
 
             {/* Quick picks */}
             <div className="flex flex-wrap gap-2">
@@ -287,10 +285,10 @@ export function MeditationLogForm() {
                     setDuration(d);
                     setUseCustom(false);
                   }}
-                  className={`px-3 py-1.5 rounded-full border text-sm font-medium transition-all ${
+                  className={`px-3.5 py-2 rounded-xl border-2 text-xs font-bold transition-all ${
                     !useCustom && duration === d
-                      ? "border-violet-300 bg-violet-50 text-violet-700"
-                      : "border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-gray-50"
+                      ? "border-violet-300 bg-violet-50 text-violet-700 shadow-xs"
+                      : "border-slate-100 text-slate-500 hover:border-violet-200 hover:bg-violet-50/20 bg-white"
                   }`}>
                   {d} min
                 </button>
@@ -298,10 +296,10 @@ export function MeditationLogForm() {
               <button
                 type="button"
                 onClick={() => setUseCustom(true)}
-                className={`px-3 py-1.5 rounded-full border text-sm font-medium transition-all ${
+                className={`px-3.5 py-2 rounded-xl border-2 text-xs font-bold transition-all ${
                   useCustom
-                    ? "border-violet-300 bg-violet-50 text-violet-700"
-                    : "border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-gray-50"
+                    ? "border-violet-300 bg-violet-50 text-violet-700 shadow-xs"
+                    : "border-slate-100 text-slate-500 hover:border-violet-200 hover:bg-violet-50/20 bg-white"
                 }`}>
                 Custom
               </button>
@@ -317,18 +315,18 @@ export function MeditationLogForm() {
                   value={customDuration}
                   onChange={(e) => setCustomDuration(e.target.value)}
                   placeholder="e.g. 25"
-                  className="w-28 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  className="w-28 rounded-xl border border-slate-200 bg-background px-3.5 py-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus:border-violet-400 h-10"
                   autoFocus
                 />
-                <span className="text-sm text-gray-400">minutes</span>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">minutes</span>
               </div>
             )}
           </div>
 
           {/* ── Notes ───────────────────────────────────────────────── */}
           <div className="space-y-1.5">
-            <Label htmlFor="meditation-notes" className="text-sm text-gray-600">
-              Notes <span className="text-gray-400">(optional)</span>
+            <Label htmlFor="meditation-notes" className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              Notes <span className="text-slate-400 font-normal normal-case">(optional)</span>
             </Label>
             <textarea
               id="meditation-notes"
@@ -336,12 +334,12 @@ export function MeditationLogForm() {
               onChange={(e) => setNotes(e.target.value)}
               placeholder="How did it feel? Any observations…"
               rows={2}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+              className="w-full rounded-xl border border-slate-200 bg-background px-3.5 py-2.5 text-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus:border-violet-400 resize-none leading-relaxed transition-all duration-150"
             />
           </div>
 
           {error && (
-            <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2">
+            <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
               {error}
             </p>
           )}
@@ -349,7 +347,7 @@ export function MeditationLogForm() {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-violet-500 hover:bg-violet-600 text-white">
+            className="w-full bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-600 hover:to-indigo-600 text-white rounded-xl h-11 font-bold shadow-md transition-all">
             {loading
               ? "Saving…"
               : editing
